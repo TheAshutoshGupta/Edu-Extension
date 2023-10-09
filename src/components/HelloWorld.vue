@@ -24,6 +24,4 @@ const count = ref(0);
 
 // function getTabId() { }
 
-if (chrome.scripting) {
-}
 </script>
