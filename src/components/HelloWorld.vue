@@ -4,10 +4,6 @@
   <div class="card">
     <button type="button">{{ count }}</button>
     <TestButton></TestButton>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR + farti
-    </p>
   </div>
 </template>
 
@@ -25,4 +21,9 @@ import TestButton from "./TestButton.vue";
 defineProps<{ msg: string }>();
 
 const count = ref(0);
+
+// function getTabId() { }
+
+if (chrome.scripting) {
+}
 </script>
