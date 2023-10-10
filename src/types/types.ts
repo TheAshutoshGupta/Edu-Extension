@@ -27,3 +27,7 @@ export interface RealityCheckCardData extends BaseBoltData {
   "Unsupported Arguments": string[];
   "Questions for Further Exploration": string[];
 }
+
+export interface BoltUserPrefs {
+  password: string;
+}

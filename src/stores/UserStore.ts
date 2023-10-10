@@ -2,6 +2,7 @@ import { useStorage } from "@vueuse/core";
 import { merge } from "lodash";
 import { defineStore } from "pinia";
 import {
+  BoltUserPrefs,
   FlashCardData,
   RealityCheckCardData,
   RewriteCardData,
@@ -36,6 +37,15 @@ export const useUserStore = defineStore("UserStore", {
     realityCheckCardData: useStorage<RealityCheckCardData[]>(
       "bolt-reality-check-data",
       [],
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
+    userPrefs: useStorage<BoltUserPrefs>(
+      "bolt-user-prefs",
+      { password: "" },
       localStorage,
       {
         mergeDefaults: (storageValue, defaults) =>

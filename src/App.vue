@@ -2,10 +2,12 @@
 import {
   faBook,
   faBrain,
+  faCog,
   faHouseUser,
   faPencilAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import Logo from "./assets/Logo.png?url";
 </script>
 
 <template>
@@ -25,13 +27,13 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
       <router-link to="/flash-cards" class="mb-2 px-0 rounded-circle nav-link"
         ><font-awesome-icon class="" alt="flash cards" :icon="faBook"
       /></router-link>
+      <router-link to="/user-settings" class="mb-2 px-0 rounded-circle nav-link"
+        ><font-awesome-icon class="" alt="flash cards" :icon="faCog"
+      /></router-link>
     </div>
     <div class="row bg-white gx-0 h-100vh p-3" style="flex-grow: 1">
       <div class="d-flex align-items-center">
-        <img
-          class="logo d-block"
-          src="https://miro.medium.com/v2/resize:fit:1200/1*LpxLQj3xgPwMaUjaM3NW7g.jpeg"
-        />
+        <img class="logo d-block" :src="Logo" />
       </div>
       <router-view></router-view>
     </div>

@@ -16,13 +16,20 @@
     </div>
     <div>
       <h2 class="pb-1 fs-6">Quick Actions</h2>
-      <history-card></history-card>
+      <history-cards
+        :card-data="userStoreRef.getAllCards.value"
+      ></history-cards>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import HistoryCard from "../components/HistoryCard.vue";
+import { storeToRefs } from "pinia";
+import HistoryCards from "../components/HistoryCards.vue";
+import { useUserStore } from "../stores/UserStore";
+
+const userStore = useUserStore();
+const userStoreRef = storeToRefs(userStore);
 </script>
 
 <style scoped>
