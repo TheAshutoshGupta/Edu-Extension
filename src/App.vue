@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
         ><font-awesome-icon class="" alt="rewrite page" :icon="faPencilAlt"
       /></router-link>
       <router-link
-        to="/critical-thinking"
+        to="/reality-check"
         class="mb-2 px-0 rounded-circle nav-link"
         ><font-awesome-icon class="" alt="critical thinking" :icon="faBrain"
       /></router-link>
