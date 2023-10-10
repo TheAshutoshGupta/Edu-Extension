@@ -6,7 +6,7 @@
     </div>
 
     <div class="d-flex">
-      <test-button></test-button>
+      <RewriteContentButton />
       <select>
         <option v-for="item in writingStyle">{{ item.text }}</option>
       </select>
@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import TestButton from "../components/TestButton.vue";
+import RewriteContentButton from "../components/RewriteContentButton.vue";
 
 interface WritingStyle {
   text: string;

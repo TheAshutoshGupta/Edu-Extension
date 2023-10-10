@@ -1,16 +1,19 @@
 <template>
   <div>
-    <button type="button" @click="getPageContent()">{{ apiCallData }}</button>
+    <p v-if="isLoading">loading</p>
+    <button v-else type="button" @click="getPageContent">
+      Rewrite page content
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useUserStore } from "../stores/UserStore";
 import { RewriteCardData } from "../types/types";
 
-const apiCallData = ref();
+const isLoading = ref(false);
 const userStore = useUserStore();
 const userStoreRef = storeToRefs(userStore);
 
@@ -20,7 +23,15 @@ function replaceTextElements() {
   let paragraphText = "";
 
   // Test Console Logs
-  logParagraphs(allParagraphs);
+  paragraphText = "";
+  allParagraphs.forEach((paragraph) => {
+    const paragraphContent = paragraph?.textContent?.trim();
+    if (paragraphContent) {
+      paragraphText += paragraphContent + "\n";
+    }
+  });
+  console.log(paragraphText);
+  paragraphText = "";
 
   // filtering out unwanted text
   const paragraphs: Element[] = [];
@@ -132,7 +143,7 @@ function replaceTextElements() {
   // });
 
   // cap groupedParagraphs at X groups (for testing, uncomment to do entire document)
-  // groupedParagraphs.splice(3);
+  groupedParagraphs.splice(1);
 
   // send groups to openai in a loop
 
@@ -187,7 +198,10 @@ function replaceTextElements() {
           interface responseParagraphDict {
             [key: string]: string;
           }
-
+          chrome.runtime.sendMessage({
+            action: "storeRewriteData",
+            content: response,
+          });
           const responseParagraphsDict: responseParagraphDict = {};
           responseParagraphs.forEach((responseParagraph) => {
             // id is at beginning of each paragraph, in the form 1: or 2: etc.
@@ -197,15 +211,6 @@ function replaceTextElements() {
             let replacementText = splitText.slice(1).join(": ");
             responseParagraphsDict[id] = replacementText;
           });
-          const cardData: RewriteCardData = {
-            dataType: "rewrite",
-            title: "test 1",
-            url: "https:",
-            text: "text",
-            icon: "pencil",
-            dateAdded: Date.now().toString(),
-          };
-          userStoreRef.rewriteCardData.value.push(cardData);
           // replace inner text of text nodes with the response text elements from OpenAI
           paragraphs.forEach((paragraph, index) => {
             // since paragraphs includes all paragraphs on the page, we need to check if the index is in the responseParagraphsDict for this specific openAI response
@@ -289,12 +294,15 @@ function replaceTextElements() {
 }
 
 const getPageContent = () => {
+  isLoading.value = true;
+
   // get active tab and execute replaceTextElements on it
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs && tabs.length > 0) {
       const activeTab = tabs[0];
       if (activeTab && activeTab.id) {
         console.log("Sending rewrite message to tab " + activeTab.id);
+        console.log(activeTab);
         chrome.scripting.executeScript({
           target: { tabId: activeTab.id },
           func: replaceTextElements,
@@ -308,16 +316,28 @@ const getPageContent = () => {
   });
 };
 
-const logParagraphs = (paragraphs: NodeListOf<Element>) => {
-  let paragraphText = "";
-  paragraphs.forEach((paragraph) => {
-    const paragraphContent = paragraph?.textContent?.trim();
-    if (paragraphContent) {
-      paragraphText += paragraphContent + "\n";
+onMounted(() => {
+  chrome.runtime.onMessage.addListener(function (request) {
+    if (request.action === "storeRewriteData") {
+      isLoading.value = false;
+      console.log("Received storeRewrite message");
+      console.log(request.content);
+      const cardData: RewriteCardData = {
+        dataType: "rewrite",
+        title: "test 1",
+        url: request.content,
+        text: "text",
+        icon: "pencil",
+        dateAdded: "",
+      };
+      userStoreRef.rewriteCardData.value.push(cardData);
+    } else {
+      isLoading.value = false;
+      console.log("Received unknown message");
+      console.log(request);
     }
   });
-  console.log(paragraphText);
-};
+});
 </script>
 
 <style scoped></style>
