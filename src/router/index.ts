@@ -4,6 +4,7 @@ import FlashcardPreview from "../views/FlashcardPreview.vue";
 import FlashcardTest from "../views/FlashcardTest.vue";
 import Main from "../views/Main.vue";
 import Rewrite from "../views/Rewrite.vue";
+import RealityCheckMenu from "../views/RealityCheckMenu.vue";
 import UserSettings from "../views/UserSettings.vue";
 
 const routes = [
@@ -42,6 +43,11 @@ const routes = [
     path: "/user-settings",
     name: "User Settings",
     component: UserSettings,
+  },
+  {
+    path: "/reality-check",
+    name: "RealityCheck",
+    component: RealityCheckMenu,
   },
 ];
 
