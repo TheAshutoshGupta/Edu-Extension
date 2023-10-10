@@ -1,7 +1,7 @@
 export interface BaseBoltData {
   title: string;
   url: string;
-  text: string;
+  text?: string;
   icon: string;
   dateAdded?: string;
 }
@@ -11,7 +11,8 @@ export interface RewriteCardData extends BaseBoltData {
 }
 
 export interface FlashCard {
-  [key: string]: string;
+  term: string;
+  definition: string;
 }
 
 export interface FlashCardData extends BaseBoltData {

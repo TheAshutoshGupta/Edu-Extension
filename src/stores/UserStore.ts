@@ -15,7 +15,7 @@ interface State {
 
 export const useUserStore = defineStore("UserStore", {
   state: () => ({
-    flashCardData: useStorage<FlashCardData[] | []>(
+    flashCardData: useStorage<FlashCardData[]>(
       "bolt-flash-card-data",
       [],
       localStorage,

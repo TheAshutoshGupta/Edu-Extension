@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Main from "../views/Main.vue";
 import Rewrite from "../views/Rewrite.vue";
+import FlashcardMenu from "../views/FlashcardMenu.vue";
 
 const routes = [
   {
@@ -16,6 +17,11 @@ const routes = [
   {
     component: Main,
     path: "/:pathMatch(.*)*",
+  },
+  {
+    path: "/flash-cards",
+    name: "Flashcard",
+    component: FlashcardMenu,
   },
 ];
 

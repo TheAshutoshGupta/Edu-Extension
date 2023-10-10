@@ -6,13 +6,14 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUserStore } from "../stores/UserStore";
+// import { storeToRefs } from "pinia";
+// import { useUserStore } from "../stores/UserStore";
 import { FlashCardData } from "../types/types";
 import { FlashCard } from "../types/types";
+import Flashcard from "../views/Flashcard.vue";
 
-const userStore = useUserStore();
-const userStoreRef = storeToRefs(userStore);
+// const userStore = useUserStore();
+// const userStoreRef = storeToRefs(userStore);
 
 const apiCallData = ref();
 
@@ -125,15 +126,24 @@ const makeFetchRequest = () => {
     groupedParagraphs.push(currentGroup);
 
     // cap groupedParagraphs at X groups (for testing, uncomment to do entire document)
-    groupedParagraphs.splice(1);
+    groupedParagraphs.splice(2);
     
     // send groups to openai in a loop
 
     const totalGroups: number = groupedParagraphs.length;
-    let currentGroupNumber: number = 1;
+    let currentGroupNumber: number = 0;
     const allNotecards: FlashCard[] = [];
-    const allFlashCardData: FlashCardData[] = [];
 
+    console.log("Total groups: " + totalGroups);
+
+    // get page URL
+    const url: string = window.location.href;
+    // get page title
+    const title: string = document.title;
+    // get date
+    const date: string = new Date().toLocaleDateString();
+    // get favicon
+    const icon: string = "https://preview.redd.it/1ctzmm4jbpg11.jpg?auto=webp&s=196146a0e42e718e87c191dcc2126bda174ba00d"
     
     groupedParagraphs.forEach((group) => {
 
@@ -142,15 +152,15 @@ const makeFetchRequest = () => {
         return `${paragraph.content}`;
       }).join("\n");
 
-      console.log("Input:");
-      console.log(extractedParagraphsString);
+      // console.log("Input:");
+      // console.log(extractedParagraphsString);
 
       // send to openai
       console.log("Sending group to OpenAI");
       const apiKey = "googoo"
       const apiUrl = "https://api.openai.com/v1/chat/completions"
 
-      let prompt = "Create a set of flashcards with notable terms and concepts from the following article and a definition for that piece of information. Do not include the term or concept for the notecard in the definition. Please format each note card in JSON and do not respond with anything besides JSON.\n\nExample JSON Format:\n[\n{\n\"Term\": \"Notecard Subject\",\n\"Definition\": \"Additional information or definition for the notecard subject.\"\n},\n]"
+      let prompt = "Create a set of flashcards with notable terms and concepts from the following article and a definition for that piece of information. Do not include the term or concept for the notecard in the definition. Please format each note card in JSON and do not respond with anything besides JSON.\n\nExample JSON Format:\n[\n{\n\"term\": \"Notecard Subject\",\n\"definition\": \"Additional information or definition for the notecard subject.\"\n},\n]"
 
       prompt += extractedParagraphsString;
 
@@ -186,27 +196,40 @@ const makeFetchRequest = () => {
             console.log("JSON Response:");
             console.log(responseJson);
             // if valid JSON, create notecards
-            if (responseJson) {
-              
+            if (true) {
+              console.log("Creating notecards");
               responseJson.forEach((notecard : FlashCard) => {
                 const term = notecard["term"];
                 const definition = notecard["definition"];
+                console.log("Term: " + term);
+                console.log("Definition: " + definition);
                 if (term && definition) {
                   const flashCard: FlashCard = {
                     term,
                     definition
                   };
                   allNotecards.push(flashCard);
-                  currentGroupNumber++;
-                  console.log("Grabbed notecards from group " + currentGroupNumber + " of " + totalGroups + " total groups");
-                  // check if this was the final group, if so, add to userstore
-                  if (currentGroupNumber > totalGroups) {
-                    console.log("Adding notecards to userstore");
-
-                  }
                 }
               });
-              
+              currentGroupNumber++;
+              console.log("Grabbed notecards from group " + currentGroupNumber + " of " + totalGroups + " total groups");
+              // check if this was the final group, if so, add to userstore
+              if (currentGroupNumber >= totalGroups) {
+                console.log("Adding notecards to userstore");
+                
+                const flashCardData: FlashCardData = {
+                  title: title,
+                  url: url,
+                  icon: icon,
+                  dateAdded: date,
+                  flashCards: allNotecards,
+                  dataType: "flashcard"
+                };
+
+                chrome.runtime.sendMessage({ action: 'storeFlashcardData', content: flashCardData });
+
+                console.log(flashCardData);
+              }  
             }
           } catch (error) {
             console.log("Error parsing JSON response");
