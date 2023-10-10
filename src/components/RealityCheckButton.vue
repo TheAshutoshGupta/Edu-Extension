@@ -1,17 +1,34 @@
 <template>
   <div>
-    <button type="button" @click="makeFetchRequest()">{{ apiCallData }}</button>
+    <div v-if="isLoading" class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <button
+      v-else
+      type="button"
+      class="btn btn-small btn-dark"
+      @click="makeFetchRequest()"
+    >
+      Reality Check
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
+import { useUserStore } from "../stores/UserStore";
 import { RealityCheckCardData } from "../types/types";
 
-const apiCallData = ref();
+const userStore = useUserStore();
+const userStoreRef = storeToRefs(userStore);
+
+const apiKey = userStoreRef.userPrefs.value.password;
+
+const isLoading = ref(false);
 
 const makeFetchRequest = () => {
-
+  isLoading.value = true;
   // get active tab and execute replaceTextElements on it
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (tabs && tabs.length > 0) {
@@ -20,7 +37,8 @@ const makeFetchRequest = () => {
         console.log('Sending generate reality check message to tab ' + activeTab.id);
         chrome.scripting.executeScript({
           target: { tabId: activeTab.id },
-          func: generateRealityCheck
+          func: generateRealityCheck,
+          args: [apiKey],
         });
       } else {
         console.error("Error: Invalid tab object");
@@ -30,7 +48,7 @@ const makeFetchRequest = () => {
     }
   });
 
-  function generateRealityCheck() {
+  function generateRealityCheck(apiKey: string) {
     
     // get all text elements (add or remove html tags as needed)
     const allParagraphs = document.querySelectorAll('p, figcaption, li');
@@ -158,7 +176,6 @@ const makeFetchRequest = () => {
 
       // send to openai
       console.log("Sending group to OpenAI");
-      const apiKey = "googoo"
       const apiUrl = "https://api.openai.com/v1/chat/completions"
 
       let userPrompt = "You are a thought partner helping me think critically about the piece of content that was provided. First, start by flagging logical fallacies, biased statements, and unsupported arguments. Provide 1 - 2 sentence explanation for each logical fallacy, biased statement, and unsupported argument. Then, provide me a list of questions that can help me continue to explore this topic. Please format the question in a way that can be copied and pasted into Google for further exploration. If you did find logical fallacies, biased statements, or unsupported arguments, please write questions that would help me think critically about these issues and lead me to more objective sources. First, provide me an example:";
@@ -281,6 +298,25 @@ const makeFetchRequest = () => {
   }
 
 };
+
+onMounted(() => {
+  if (chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener(function (request) {
+      if (request.action === "storeRealityCheck") {
+        isLoading.value = false;
+        console.log("Received storeRealityCheck message");
+        const responseData = request.content as RealityCheckCardData;
+        console.log(responseData);
+        userStoreRef.realityCheckCardData.value.push(responseData);
+      } else {
+        isLoading.value = false;
+        console.log("Received unknown message");
+        console.log(request);
+      }
+    });
+  }
+})
+
 </script>
 
 <style scoped></style>
