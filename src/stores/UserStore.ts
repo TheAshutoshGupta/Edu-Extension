@@ -24,7 +24,7 @@ export const useUserStore = defineStore("UserStore", {
           merge(defaults, storageValue),
       }
     ),
-    rewriteCardData: useStorage<RewriteCardData[] | []>(
+    rewriteCardData: useStorage<RewriteCardData[]>(
       "bolt-rewrite-card-data",
       [],
       localStorage,

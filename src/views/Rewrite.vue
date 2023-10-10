@@ -4,7 +4,9 @@
       <p class="pb-1 fs-6">Common Links</p>
       <router-link to="/">Go to Home</router-link>
     </div>
+
     <div class="d-flex">
+      <test-button></test-button>
       <select>
         <option v-for="item in writingStyle">{{ item.text }}</option>
       </select>
@@ -24,6 +26,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import TestButton from "../components/TestButton.vue";
 
 interface WritingStyle {
   text: string;
