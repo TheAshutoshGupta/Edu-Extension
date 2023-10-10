@@ -22,6 +22,12 @@ defineProps<{ msg: string }>();
 
 const count = ref(0);
 
-// function getTabId() { }
+// function getTitle() { return document.title; }
 
+// if (chrome.scripting) {
+//   chrome.scripting.executeScript({
+//     target: { tabId: getTabId() },
+//     func: getTitle,
+//   })
+// }
 </script>
