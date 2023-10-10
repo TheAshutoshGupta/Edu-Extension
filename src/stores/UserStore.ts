@@ -15,7 +15,7 @@ interface State {
 
 export const useUserStore = defineStore("UserStore", {
   state: () => ({
-    flashCardData: useStorage<FlashCardData[] | []>(
+    flashCardData: useStorage<FlashCardData[]>(
       "bolt-flash-card-data",
       [],
       localStorage,
@@ -24,7 +24,7 @@ export const useUserStore = defineStore("UserStore", {
           merge(defaults, storageValue),
       }
     ),
-    rewriteCardData: useStorage<RewriteCardData[] | []>(
+    rewriteCardData: useStorage<RewriteCardData[]>(
       "bolt-rewrite-card-data",
       [],
       localStorage,
