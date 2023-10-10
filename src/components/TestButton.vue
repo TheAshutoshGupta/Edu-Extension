@@ -30,14 +30,50 @@ const makeFetchRequest = () => {
 
   function replaceTextElements() {
     
-    const paragraphs = document.querySelectorAll('p, figcaption');
-    console.log(paragraphs);
-    // remove all paragraphs that are in a header, footer, or nav element
+    const allParagraphs = document.querySelectorAll('p, figcaption, li');
     
+    let paragraphText = "";
 
-    console.log(paragraphs);
+    allParagraphs.forEach((paragraph) => {
+      const paragraphContent = paragraph?.textContent?.trim();
+      if (paragraphContent) {
+        paragraphText += paragraphContent + "\n";
+      }
+    });
 
-    return;
+    console.log(paragraphText);
+
+    paragraphText = "";
+
+    const paragraphs = [];
+    // remove all paragraphs that are in a header, footer, or nav element or class is navbox
+    // Iterate over the selected elements and filter out unwanted ones
+    allParagraphs.forEach((paragraph) => {
+      const paragraphContent = paragraph?.textContent?.trim();
+      
+      // Check if the paragraph is within a <header>, <footer>, or <nav> element or has the class 'navbox'
+      const isInHeaderFooterNavOrHasNavbox = paragraph.closest('header, footer, nav') || paragraph.closest('.navbox, .sidebar, .catlinks, .reflist');
+
+      // If the paragraph meets any of the criteria, remove it
+      if (paragraphContent && isInHeaderFooterNavOrHasNavbox) {
+        // Uncomment the line below to remove the paragraph from the DOM
+        // paragraph.remove();
+        // paragraphText += paragraphContent + "\n";
+      } else if (paragraphContent) {
+        paragraphText += paragraphContent + "\n";
+        paragraphs.push(paragraph);
+      }
+    });
+
+    // console.log(paragraphText);
+
+    paragraphs.forEach((paragraph) => {
+      const paragraphContent = paragraph?.textContent?.trim();
+      if (paragraphContent) {
+        console.log(paragraphContent);
+      }
+    });
+
 
     const extractedParagraphs = [];
     const extractedLinks = {};
@@ -122,7 +158,7 @@ const makeFetchRequest = () => {
       const apiUrl = "https://api.openai.com/v1/chat/completions"
 
       let prompt = "Hello";
-      prompt = "You are a bot that rewrites content. You maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers or anything else. Please rewrite this content to match a 4th grade reading level:\n"
+      prompt = "You are a bot that rewrites content. You maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers or anything else. Please rewrite this content to match a 1st grade reading level:\n"
 
       prompt += extractedParagraphsString;
 
@@ -183,8 +219,20 @@ const makeFetchRequest = () => {
             //   replacementText = replacementText.replaceAll(linkText, `<a href="${linkHref}">${linkText}</a>`);
             // });
 
-            const realLinks = Object.keys(extractedLinks).filter(linkText => extractedLinks[linkText].paragraphId.includes(index + 1) && !linkText.includes('[') && !linkText.includes(']'));
-            // change to check if the paragraphId is one of the multiple in the list
+            for (const linkText in extractedLinks)
+            {
+              if(replacementText.includes(linkText))
+              {
+                // also check if it belongs to same paragraph
+                if(extractedLinks[linkText].paragraphId.includes(index + 1)){
+                  replacementText = replacementText.replace(linkText, `<a href="${extractedLinks[linkText].link}">${linkText}</a>`)
+                }
+                
+              }
+            }
+
+            const realLinks = Object.keys(extractedLinks).filter(linkText => extractedLinks[linkText].paragraphId.includes(index + 1) && !linkText.includes('[') && !linkText.includes(']') && !replacementText.includes(linkText));
+
 
             if(realLinks.length > 0) {
               const linksHtmtl = realLinks.map(linkText => `<a href="${extractedLinks[linkText].link}">${linkText}</a>`).join(', ');
