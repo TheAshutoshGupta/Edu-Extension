@@ -17,17 +17,21 @@
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { ref } from "vue";
+import {
+  BaseBoltData,
+  FlashCardData,
+  RealityCheckCardData,
+  RewriteCardData,
+} from "../types/types.ts";
 
-interface BaseCard {
-  title?: string;
-  url?: string;
-  text?: string;
-  icon?: string;
-}
-
-const responseHistory = ref<BaseCard[]>([
+const responseHistory = ref<
+  BaseBoltData[] | RealityCheckCardData[] | RewriteCardData[] | FlashCardData[]
+>([
   {
     text: "Configure the active CSS class applied when the link is active. Note the default value can also be configured globally via the linkActiveClass router constructor option.",
+    url: "https://google.com",
+    icon: "test",
+    title: "yeah man",
   },
 ]);
 </script>

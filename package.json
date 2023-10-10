@@ -13,7 +13,11 @@
     "@fortawesome/free-regular-svg-icons": "5.x",
     "@fortawesome/free-solid-svg-icons": "5.x",
     "@fortawesome/vue-fontawesome": "^3.0.3",
+    "@types/lodash": "^4.14.199",
+    "@vueuse/core": "^10.5.0",
     "bootstrap": "^5.3.2",
+    "lodash": "^4.17.21",
+    "pinia": "^2.1.6",
     "vue": "^3.3.4",
     "vue-router": "4"
   },
