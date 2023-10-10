@@ -17,16 +17,22 @@
     </div>
     <p>Recent</p>
     <div>
-      <div v-for="item in pastReWriteItems">
-        <p>{{ item.text }}</p>
-      </div>
+      <history-cards
+        :card-data="userStoreRef.rewriteCardData.value"
+      ></history-cards>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from "pinia";
 import { ref } from "vue";
+import HistoryCards from "../components/HistoryCards.vue";
 import RewriteContentButton from "../components/RewriteContentButton.vue";
+import { useUserStore } from "../stores/UserStore";
+
+const userStore = useUserStore();
+const userStoreRef = storeToRefs(userStore);
 
 interface WritingStyle {
   text: string;
@@ -35,15 +41,9 @@ interface LengthOption {
   text: string;
 }
 
-interface ReWriteItem {
-  text: string;
-}
-
 const writingStyle: WritingStyle[] = [{ text: "hello" }];
 const lengthOption: LengthOption[] = [{ text: "Same" }];
 const preexistingKnowledge = ref<string>("");
-
-const pastReWriteItems = ref<ReWriteItem[]>([{ text: "This was re-written" }]);
 </script>
 
 <style scoped></style>

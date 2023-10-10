@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
+import FlashcardMenu from "../views/FlashcardMenu.vue";
+import FlashcardPreview from "../views/FlashcardPreview.vue";
+import FlashcardTest from "../views/FlashcardTest.vue";
 import Main from "../views/Main.vue";
 import Rewrite from "../views/Rewrite.vue";
-import FlashcardMenu from "../views/FlashcardMenu.vue";
+import UserSettings from "../views/UserSettings.vue";
 
 const routes = [
   {
@@ -22,6 +25,23 @@ const routes = [
     path: "/flash-cards",
     name: "Flashcard",
     component: FlashcardMenu,
+  },
+  {
+    path: "/flash-card-preview/:id",
+    name: "Flashcard Preview",
+    component: FlashcardPreview,
+    props: true,
+  },
+  {
+    path: "/flash-card-test/:id",
+    name: "Flashcard Test",
+    component: FlashcardTest,
+    props: true,
+  },
+  {
+    path: "/user-settings",
+    name: "User Settings",
+    component: UserSettings,
   },
 ];
 

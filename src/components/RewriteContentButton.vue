@@ -17,7 +17,9 @@ const isLoading = ref(false);
 const userStore = useUserStore();
 const userStoreRef = storeToRefs(userStore);
 
-function replaceTextElements() {
+const apiKey = userStoreRef.userPrefs.value.password;
+
+function replaceTextElements(apiKey: string) {
   // get all text elements (add or remove html tags as needed)
   const allParagraphs = document.querySelectorAll("p, figcaption, li");
   let paragraphText = "";
@@ -160,7 +162,6 @@ function replaceTextElements() {
 
     // send to openai
     console.log("Sending group to OpenAI");
-    const apiKey = "googoo";
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
     let prompt = `You are a bot that rewrites content. You maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers or anything else. Please rewrite this content to match a 1st grade reading level:\n ${extractedParagraphsString}`;
@@ -306,6 +307,7 @@ const getPageContent = () => {
         chrome.scripting.executeScript({
           target: { tabId: activeTab.id },
           func: replaceTextElements,
+          args: [apiKey],
         });
       } else {
         console.error("Error: Invalid tab object");
@@ -317,26 +319,28 @@ const getPageContent = () => {
 };
 
 onMounted(() => {
-  chrome.runtime.onMessage.addListener(function (request) {
-    if (request.action === "storeRewriteData") {
-      isLoading.value = false;
-      console.log("Received storeRewrite message");
-      console.log(request.content);
-      const cardData: RewriteCardData = {
-        dataType: "rewrite",
-        title: "test 1",
-        url: request.content,
-        text: "text",
-        icon: "pencil",
-        dateAdded: "",
-      };
-      userStoreRef.rewriteCardData.value.push(cardData);
-    } else {
-      isLoading.value = false;
-      console.log("Received unknown message");
-      console.log(request);
-    }
-  });
+  if (chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener(function (request) {
+      if (request.action === "storeRewriteData") {
+        isLoading.value = false;
+        console.log("Received storeRewrite message");
+        console.log(request.content);
+        const cardData: RewriteCardData = {
+          dataType: "rewrite",
+          title: "test 1",
+          url: request.content,
+          text: "text",
+          icon: "pencil",
+          dateAdded: "",
+        };
+        userStoreRef.rewriteCardData.value.push(cardData);
+      } else {
+        isLoading.value = false;
+        console.log("Received unknown message");
+        console.log(request);
+      }
+    });
+  }
 });
 </script>
 

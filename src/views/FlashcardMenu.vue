@@ -6,36 +6,27 @@
       <NotecardButton></NotecardButton>
     </div>
     <div>
+      <flash-card
+        @click="
+          $router.push({
+            path: `/flash-card-preview/${index}`,
+          })
+        "
+        v-for="(item, index) in userStoreRef.flashCardData.value"
+        :card-data="item"
+      ></flash-card>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { FlashCardData } from "../types/types";
-import NotecardButton from "../components/NotecardButton.vue";
 import { storeToRefs } from "pinia";
+import FlashCard from "../components/FlashCard.vue";
+import NotecardButton from "../components/NotecardButton.vue";
 import { useUserStore } from "../stores/UserStore";
-
-const flashcards: FlashCardData[] = [];
 
 const userStore = useUserStore();
 const userStoreRef = storeToRefs(userStore);
-
-
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === 'storeFlashcardData') {
-    console.log('Received storeFlashcardData message');
-    const responseData = request.content as FlashCardData;
-    console.log(responseData);
-    userStoreRef.flashCardData.value.push(responseData);
-  }
-  else {
-    console.log('Received unknown message');
-    console.log(request);
-  }
-});
-
 </script>
 
 <style scoped>

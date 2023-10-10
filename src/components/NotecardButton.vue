@@ -1,33 +1,45 @@
 <template>
   <div>
-    <button type="button" @click="makeFetchRequest()">{{ apiCallData }}</button>
+    <div v-if="isLoading" class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <button
+      v-else
+      type="button"
+      class="btn btn-small btn-dark"
+      @click="makeFetchRequest()"
+    >
+      Create notecards from page
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-// import { storeToRefs } from "pinia";
-// import { useUserStore } from "../stores/UserStore";
-import { FlashCardData } from "../types/types";
-import { FlashCard } from "../types/types";
-import Flashcard from "../views/Flashcard.vue";
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
+import { useUserStore } from "../stores/UserStore";
+import { FlashCard, FlashCardData } from "../types/types";
 
-// const userStore = useUserStore();
-// const userStoreRef = storeToRefs(userStore);
+const userStore = useUserStore();
+const userStoreRef = storeToRefs(userStore);
 
-const apiCallData = ref();
+const apiKey = userStoreRef.userPrefs.value.password;
+
+const isLoading = ref(false);
 
 const makeFetchRequest = () => {
+  isLoading.value = true;
 
   // get active tab and execute replaceTextElements on it
-  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs && tabs.length > 0) {
       const activeTab = tabs[0];
       if (activeTab && activeTab.id) {
-        console.log('Sending generate notecard message to tab ' + activeTab.id);
+        console.log("Sending generate notecard message to tab " + activeTab.id);
         chrome.scripting.executeScript({
           target: { tabId: activeTab.id },
-          func: generateNoteCards
+          func: generateNoteCards,
+          args: [apiKey],
         });
       } else {
         console.error("Error: Invalid tab object");
@@ -37,11 +49,10 @@ const makeFetchRequest = () => {
     }
   });
 
-  function generateNoteCards() {
-    
+  function generateNoteCards(apiKey: string) {
     // get all text elements (add or remove html tags as needed)
-    const allParagraphs = document.querySelectorAll('p, figcaption, li');
-    
+    const allParagraphs = document.querySelectorAll("p, figcaption, li");
+
     // just for printing
     let paragraphText = "";
     allParagraphs.forEach((paragraph) => {
@@ -60,10 +71,12 @@ const makeFetchRequest = () => {
     // Iterate over the selected elements and filter out unwanted ones
     allParagraphs.forEach((paragraph) => {
       const paragraphContent = paragraph?.textContent?.trim();
-      
+
       // Check if the paragraph is within a <header>, <footer>, or <nav> element or has the class 'navbox'
       // can add more classes or tags to exclude here
-        const isInHeaderFooterNavOrHasNavbox = paragraph.closest('header, footer, nav') || paragraph.closest('.navbox, .sidebar, .catlinks, .reflist');
+      const isInHeaderFooterNavOrHasNavbox =
+        paragraph.closest("header, footer, nav") ||
+        paragraph.closest(".navbox, .sidebar, .catlinks, .reflist");
 
       // If the paragraph isn't any of the above, add it to the final paragraphs array
       if (paragraphContent && isInHeaderFooterNavOrHasNavbox) {
@@ -95,14 +108,11 @@ const makeFetchRequest = () => {
       const paragraphContent = paragraph?.textContent?.trim();
       const paragraphId = index + 1;
       if (paragraphContent) {
-
         extractedParagraphs.push({
           id: paragraphId,
-          content: paragraphContent
+          content: paragraphContent,
         });
-
       }
-
     });
 
     // at this point, we want to create groups of paragraphs to send to the LLM
@@ -126,8 +136,8 @@ const makeFetchRequest = () => {
     groupedParagraphs.push(currentGroup);
 
     // cap groupedParagraphs at X groups (for testing, uncomment to do entire document)
-    groupedParagraphs.splice(2);
-    
+    groupedParagraphs.splice(1);
+
     // send groups to openai in a loop
 
     const totalGroups: number = groupedParagraphs.length;
@@ -143,108 +153,132 @@ const makeFetchRequest = () => {
     // get date
     const date: string = new Date().toLocaleDateString();
     // get favicon
-    const icon: string = "https://preview.redd.it/1ctzmm4jbpg11.jpg?auto=webp&s=196146a0e42e718e87c191dcc2126bda174ba00d"
-    
-    groupedParagraphs.forEach((group) => {
+    const icon: string =
+      "https://preview.redd.it/1ctzmm4jbpg11.jpg?auto=webp&s=196146a0e42e718e87c191dcc2126bda174ba00d";
 
-        // map elements to string to send to openai
-      const extractedParagraphsString = group.map((paragraph) => {
-        return `${paragraph.content}`;
-      }).join("\n");
+    groupedParagraphs.forEach((group) => {
+      // map elements to string to send to openai
+      const extractedParagraphsString = group
+        .map((paragraph) => {
+          return `${paragraph.content}`;
+        })
+        .join("\n");
 
       // console.log("Input:");
       // console.log(extractedParagraphsString);
 
       // send to openai
       console.log("Sending group to OpenAI");
-      const apiKey = "googoo"
-      const apiUrl = "https://api.openai.com/v1/chat/completions"
+      const apiUrl = "https://api.openai.com/v1/chat/completions";
 
-      let prompt = "Create a set of flashcards with notable terms and concepts from the following article and a definition for that piece of information. Do not include the term or concept for the notecard in the definition. Please format each note card in JSON and do not respond with anything besides JSON.\n\nExample JSON Format:\n[\n{\n\"term\": \"Notecard Subject\",\n\"definition\": \"Additional information or definition for the notecard subject.\"\n},\n]"
+      let prompt =
+        'Create a set of flashcards with notable terms and concepts from the following article and a definition for that piece of information. Do not include the term or concept for the notecard in the definition. Please format each note card in JSON and do not respond with anything besides JSON.\n\nExample JSON Format:\n[\n{\n"term": "Notecard Subject",\n"definition": "Additional information or definition for the notecard subject."\n},\n]';
 
       prompt += extractedParagraphsString;
 
-      fetch(apiUrl, 
-      {
-        method: 'POST',
+      fetch(apiUrl, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization':'Bearer '+apiKey
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + apiKey,
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [
+          model: "gpt-3.5-turbo",
+          messages: [
             {
               role: "user",
-              content: prompt
-            }
+              content: prompt,
+            },
           ],
-          "temperature": 0.9
-        })
-      }
-      ).then((response) => response.json()
-      ).then((responseData) => {
-        
-        //console.log(responseData);
-        const response = responseData["choices"][0]["message"]["content"]
-        console.log("OpenAI Response:");
-        console.log(response);
-        if (response) {
-          // try to parse response as JSON
-          try {
-            const responseJson = JSON.parse(response);
-            console.log("JSON Response:");
-            console.log(responseJson);
-            // if valid JSON, create notecards
-            if (true) {
-              console.log("Creating notecards");
-              responseJson.forEach((notecard : FlashCard) => {
-                const term = notecard["term"];
-                const definition = notecard["definition"];
-                console.log("Term: " + term);
-                console.log("Definition: " + definition);
-                if (term && definition) {
-                  const flashCard: FlashCard = {
-                    term,
-                    definition
+          temperature: 0.9,
+        }),
+      })
+        .then((response) => response.json())
+        .then((responseData) => {
+          //console.log(responseData);
+          const response = responseData["choices"][0]["message"]["content"];
+          console.log("OpenAI Response:");
+          console.log(response);
+          if (response) {
+            // try to parse response as JSON
+            try {
+              const responseJson = JSON.parse(response);
+              console.log("JSON Response:");
+              console.log(responseJson);
+              // if valid JSON, create notecards
+              if (true) {
+                console.log("Creating notecards");
+                responseJson.forEach((notecard: FlashCard) => {
+                  const term = notecard["term"];
+                  const definition = notecard["definition"];
+                  console.log("Term: " + term);
+                  console.log("Definition: " + definition);
+                  if (term && definition) {
+                    const flashCard: FlashCard = {
+                      term,
+                      definition,
+                    };
+                    allNotecards.push(flashCard);
+                  }
+                });
+                currentGroupNumber++;
+                console.log(
+                  "Grabbed notecards from group " +
+                    currentGroupNumber +
+                    " of " +
+                    totalGroups +
+                    " total groups"
+                );
+                // check if this was the final group, if so, add to userstore
+                if (currentGroupNumber >= totalGroups) {
+                  console.log("Adding notecards to userstore");
+
+                  const flashCardData: FlashCardData = {
+                    title: title,
+                    url: url,
+                    icon: icon,
+                    dateAdded: date,
+                    flashCards: allNotecards,
+                    dataType: "flashcard",
                   };
-                  allNotecards.push(flashCard);
+
+                  chrome.runtime.sendMessage({
+                    action: "storeFlashcardData",
+                    content: flashCardData,
+                  });
+
+                  console.log(flashCardData);
                 }
-              });
-              currentGroupNumber++;
-              console.log("Grabbed notecards from group " + currentGroupNumber + " of " + totalGroups + " total groups");
-              // check if this was the final group, if so, add to userstore
-              if (currentGroupNumber >= totalGroups) {
-                console.log("Adding notecards to userstore");
-                
-                const flashCardData: FlashCardData = {
-                  title: title,
-                  url: url,
-                  icon: icon,
-                  dateAdded: date,
-                  flashCards: allNotecards,
-                  dataType: "flashcard"
-                };
-
-                chrome.runtime.sendMessage({ action: 'storeFlashcardData', content: flashCardData });
-
-                console.log(flashCardData);
-              }  
+              }
+            } catch (error) {
+              console.log("Error parsing JSON response");
             }
-          } catch (error) {
-            console.log("Error parsing JSON response");
           }
-
-        }
-      }).catch((error) => {
-        console.log(error);
-      });
-
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     });
-
   }
-
 };
+
+onMounted(() => {
+  if (chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener(function (request) {
+      if (request.action === "storeFlashcardData") {
+        isLoading.value = false;
+        console.log("Received storeFlashcardData message");
+        const responseData = request.content as FlashCardData;
+        console.log(responseData);
+        userStoreRef.flashCardData.value.push(responseData);
+      } else {
+        isLoading.value = false;
+        console.log("Received unknown message");
+        console.log(request);
+      }
+    });
+  }
+});
 </script>
 
 <style scoped></style>
