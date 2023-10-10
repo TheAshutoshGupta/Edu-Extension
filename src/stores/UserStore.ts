@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import {
   BoltUserPrefs,
   FlashCardData,
+  FlashCardTestProgressData,
   RealityCheckCardData,
   RewriteCardData,
 } from "../types/types";
@@ -13,6 +14,12 @@ interface State {
   rewriteCardData: RewriteCardData[];
   realityCheckCardData: RealityCheckCardData[];
 }
+
+const defaultFlashCardTestProgressData: FlashCardTestProgressData = {
+  flashCardGroupIndex: 0,
+  currentFlashCardIndex: 0,
+  flashCardProgress: {},
+};
 
 export const useUserStore = defineStore("UserStore", {
   state: () => ({
@@ -52,6 +59,15 @@ export const useUserStore = defineStore("UserStore", {
           merge(defaults, storageValue),
       }
     ),
+    flashCardTestProgress: useStorage<FlashCardTestProgressData>(
+      "bolt-flash-card-test-progress",
+      defaultFlashCardTestProgressData,
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
   }),
   getters: {
     getAllCards: (
@@ -73,6 +89,7 @@ export const useUserStore = defineStore("UserStore", {
       this.realityCheckCardData = [];
       this.flashCardData = [];
       this.rewriteCardData = [];
+      this.userPrefs = { password: "" };
     },
   },
 });

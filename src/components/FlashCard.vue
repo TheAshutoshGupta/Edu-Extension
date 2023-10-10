@@ -5,7 +5,7 @@
         class="position-absolute rounded-pill bg-dark text-white p-2 card-icon"
         :icon="faPencilAlt"
       />
-      <p>{{ props.cardData.text }}</p>
+      <p>{{ props.cardData.title }}</p>
       <p>{{ props.cardData.flashCards.length }} Cards</p>
     </div>
   </div>
@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { onMounted } from "vue";
 import { FlashCardData } from "../types/types.ts";
 
 type PropTypes = {
@@ -21,6 +22,10 @@ type PropTypes = {
 };
 
 const props = defineProps<PropTypes>();
+
+onMounted(() => {
+  console.log(props.cardData);
+});
 </script>
 
 <style scoped>

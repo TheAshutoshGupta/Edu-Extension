@@ -31,3 +31,13 @@ export interface RealityCheckCardData extends BaseBoltData {
 export interface BoltUserPrefs {
   password: string;
 }
+
+export interface FlashCardProgress {
+  [key: string]: boolean;
+}
+
+export interface FlashCardTestProgressData {
+  flashCardGroupIndex: number;
+  currentFlashCardIndex: number;
+  flashCardProgress: FlashCardProgress;
+}
