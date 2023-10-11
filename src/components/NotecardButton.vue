@@ -6,10 +6,10 @@
     <button
       v-else
       type="button"
-      class="btn btn-small btn-dark"
+      class="btn btn-sm btn-dark rounded-pill"
       @click="makeFetchRequest()"
     >
-      Create notecards from page
+      Create Note Cards From Page
     </button>
   </div>
 </template>

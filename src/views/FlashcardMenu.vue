@@ -1,20 +1,22 @@
 <template>
   <div class="w-100">
-    <hr />
-    <p class="mb-1 fs-6">Flashcard Generator!!</p>
-    <div class="d-flex common-links">
+    <div class="d-flex common-links mb-2">
       <NotecardButton></NotecardButton>
     </div>
     <div>
-      <flash-card
-        @click="
-          $router.push({
-            path: `/flash-card-preview/${index}`,
-          })
-        "
-        v-for="(item, index) in userStoreRef.flashCardData.value"
-        :card-data="item"
-      ></flash-card>
+      <p class="mb-2">Recent</p>
+      <div class="card-wrapper">
+        <flash-card
+          class="card-sizing"
+          @click="
+            $router.push({
+              path: `/flash-card-preview/${index}`,
+            })
+          "
+          v-for="(item, index) in userStoreRef.flashCardData.value"
+          :card-data="item"
+        ></flash-card>
+      </div>
     </div>
   </div>
 </template>
@@ -32,5 +34,20 @@ const userStoreRef = storeToRefs(userStore);
 <style scoped>
 .common-links {
   gap: 0.25rem;
+}
+.card-wrapper {
+  --cols: 2;
+  --gap: 15px;
+  display: flex;
+  gap: var(--gap);
+}
+.card-sizing {
+  flex-basis: calc(
+    100% / var(--cols) - var(--gap) / var(--cols) * (var(--cols) - 1)
+  );
+}
+
+.card-sizing:hover {
+  cursor: pointer;
 }
 </style>

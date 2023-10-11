@@ -18,7 +18,7 @@ interface State {
 const defaultFlashCardTestProgressData: FlashCardTestProgressData = {
   flashCardGroupIndex: 0,
   currentFlashCardIndex: 0,
-  flashCardProgress: {},
+  flashCardProgress: [],
 };
 
 export const useUserStore = defineStore("UserStore", {
@@ -75,11 +75,11 @@ export const useUserStore = defineStore("UserStore", {
     ): Array<FlashCardData | RewriteCardData | RealityCheckCardData> => {
       const dataArray: Array<
         FlashCardData | RewriteCardData | RealityCheckCardData
-      > = [];
+      > = state.rewriteCardData;
       dataArray.concat(
         state.flashCardData,
         state.rewriteCardData,
-        state.rewriteCardData
+        state.realityCheckCardData
       );
       return dataArray;
     },
@@ -90,6 +90,16 @@ export const useUserStore = defineStore("UserStore", {
       this.flashCardData = [];
       this.rewriteCardData = [];
       this.userPrefs = { password: "" };
+      this.flashCardTestProgress = defaultFlashCardTestProgressData;
+    },
+    clearFlashCardProgress() {
+      console.log(this.flashCardTestProgress);
+      this.flashCardTestProgress = {
+        flashCardGroupIndex: 0,
+        currentFlashCardIndex: 0,
+        flashCardProgress: [],
+      };
+      console.log(this.flashCardTestProgress);
     },
   },
 });

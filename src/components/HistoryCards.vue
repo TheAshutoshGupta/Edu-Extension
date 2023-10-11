@@ -2,7 +2,7 @@
   <div class="d-flex flex-wrap card-wrapper">
     <div
       v-for="item in props.cardData"
-      class="bg-light rounded-2 card-sizing p-3 position-relative"
+      class="bg-light rounded-3 card-sizing p-3 position-relative"
     >
       <font-awesome-icon
         class="position-absolute rounded-pill bg-dark text-white p-2 card-icon"
@@ -36,10 +36,15 @@ const props = defineProps<PropTypes>();
 
 <style scoped>
 .card-wrapper {
-  gap: 1rem;
+  --cols: 2;
+  --gap: 30px;
+  display: flex;
+  gap: var(--gap);
 }
 .card-sizing {
-  flex-basis: calc(50% - 1rem);
+  flex-basis: calc(
+    100% / var(--cols) - var(--gap) / var(--cols) * (var(--cols) - 1)
+  );
 }
 .card-icon {
   top: 0;

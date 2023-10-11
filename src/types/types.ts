@@ -33,11 +33,12 @@ export interface BoltUserPrefs {
 }
 
 export interface FlashCardProgress {
-  [key: string]: boolean;
+  cardIndex: number;
+  passed: boolean;
 }
 
 export interface FlashCardTestProgressData {
   flashCardGroupIndex: number;
   currentFlashCardIndex: number;
-  flashCardProgress: FlashCardProgress;
+  flashCardProgress: FlashCardProgress[];
 }

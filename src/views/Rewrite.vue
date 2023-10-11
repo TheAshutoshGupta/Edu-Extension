@@ -1,10 +1,5 @@
 <template>
   <div>
-    <div>
-      <p class="pb-1 fs-6">Common Links</p>
-      <router-link to="/">Go to Home</router-link>
-    </div>
-
     <div class="d-flex">
       <RewriteContentButton />
       <select>

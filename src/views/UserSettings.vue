@@ -1,6 +1,10 @@
 <template>
   <div>
     <button @click="userStore.clearAllData()">clear all saved data</button>
+    <button @click="userStore.clearFlashCardProgress">
+      clear flashcard progress
+    </button>
+
     <p>API Password</p>
     <input type="password" v-model="userStoreRef.userPrefs.value.password" />
   </div>

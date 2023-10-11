@@ -1,6 +1,6 @@
 <template>
-  <div class="d-flex flex-wrap card-wrapper">
-    <div class="bg-light rounded-2 card-sizing p-3 position-relative">
+  <div class="d-flex flex-wrap">
+    <div class="bg-light rounded-3 p-3 position-relative">
       <font-awesome-icon
         class="position-absolute rounded-pill bg-dark text-white p-2 card-icon"
         :icon="faPencilAlt"
