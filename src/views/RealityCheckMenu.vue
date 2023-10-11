@@ -8,8 +8,13 @@
       <h2 class="pb-1 fs-6 fw-bold">Recent</h2>
       <div class="card-wrapper">
         <reality-check-card
+          @click="
+            $router.push({
+              path: `/reality-check-view/${index}`,
+            })
+          "
           class="card-sizing"
-          v-for="item in userStoreRef.realityCheckCardData.value"
+          v-for="(item, index) in userStoreRef.realityCheckCardData.value"
           :card-data="item"
         ></reality-check-card>
       </div>
