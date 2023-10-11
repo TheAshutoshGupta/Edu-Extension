@@ -4,15 +4,28 @@ import { defineStore } from "pinia";
 import {
   BoltUserPrefs,
   FlashCardData,
+  FlashCardTestProgressData,
+  LengthOption,
+  PreexistingKnowledge,
   RealityCheckCardData,
   RewriteCardData,
+  WritingStyle,
 } from "../types/types";
 
 interface State {
   flashCardData: FlashCardData[];
   rewriteCardData: RewriteCardData[];
   realityCheckCardData: RealityCheckCardData[];
+  selectedWritingStyle: WritingStyle;
+  selectedLengthOption: LengthOption;
+  preexistingKnowledge: PreexistingKnowledge;
 }
+
+const defaultFlashCardTestProgressData: FlashCardTestProgressData = {
+  flashCardGroupIndex: 0,
+  currentFlashCardIndex: 0,
+  flashCardProgress: [],
+};
 
 export const useUserStore = defineStore("UserStore", {
   state: () => ({
@@ -43,9 +56,45 @@ export const useUserStore = defineStore("UserStore", {
           merge(defaults, storageValue),
       }
     ),
+    selectedWritingStyle: useStorage<WritingStyle>(
+      "bolt-selected-writing-style",
+      { text: "" } as WritingStyle,
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
+    selectedLengthOption: useStorage<LengthOption>(
+      "bolt-selected-length-option",
+      { text: "Same" } as LengthOption,
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
+    preexistingKnowledge: useStorage<PreexistingKnowledge>(
+      "bolt-preexisting-knowledge",
+      { text: "" } as PreexistingKnowledge,
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
     userPrefs: useStorage<BoltUserPrefs>(
       "bolt-user-prefs",
       { password: "" },
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
+    flashCardTestProgress: useStorage<FlashCardTestProgressData>(
+      "bolt-flash-card-test-progress",
+      defaultFlashCardTestProgressData,
       localStorage,
       {
         mergeDefaults: (storageValue, defaults) =>
@@ -59,11 +108,11 @@ export const useUserStore = defineStore("UserStore", {
     ): Array<FlashCardData | RewriteCardData | RealityCheckCardData> => {
       const dataArray: Array<
         FlashCardData | RewriteCardData | RealityCheckCardData
-      > = [];
+      > = state.rewriteCardData;
       dataArray.concat(
         state.flashCardData,
         state.rewriteCardData,
-        state.rewriteCardData
+        state.realityCheckCardData
       );
       return dataArray;
     },
@@ -73,6 +122,17 @@ export const useUserStore = defineStore("UserStore", {
       this.realityCheckCardData = [];
       this.flashCardData = [];
       this.rewriteCardData = [];
+      this.userPrefs = { password: "" };
+      this.flashCardTestProgress = defaultFlashCardTestProgressData;
+    },
+    clearFlashCardProgress() {
+      console.log(this.flashCardTestProgress);
+      this.flashCardTestProgress = {
+        flashCardGroupIndex: 0,
+        currentFlashCardIndex: 0,
+        flashCardProgress: [],
+      };
+      console.log(this.flashCardTestProgress);
     },
   },
 });
