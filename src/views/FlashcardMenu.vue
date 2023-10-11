@@ -1,6 +1,8 @@
 <template>
   <div class="w-100">
-    <div class="d-flex common-links mb-2">
+    <div
+      class="d-flex common-links justify-content-center align-items-center w-100 mb-2"
+    >
       <NotecardButton></NotecardButton>
     </div>
     <div>

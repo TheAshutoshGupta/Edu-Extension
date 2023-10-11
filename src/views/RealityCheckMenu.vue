@@ -1,7 +1,8 @@
 <template>
   <div class="w-100">
-    <p class="mb-1 fs-6">Reality Checker!!</p>
-    <div class="d-flex common-links">
+    <div
+      class="d-flex common-links justify-content-center align-items-center w-100 mb-2"
+    >
       <RealityCheckButton></RealityCheckButton>
     </div>
     <div>

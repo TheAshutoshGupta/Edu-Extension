@@ -3,7 +3,7 @@
     <div class="w-100 bg-light rounded-3 p-3 position-relative">
       <font-awesome-icon
         class="position-absolute rounded-pill bg-dark text-white p-2 card-icon"
-        :icon="faPencilAlt"
+        :icon="faBrain"
       />
       <p>{{ props.cardData.title }}</p>
       <p>{{ props.cardData.text }}</p>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
+import { faBrain } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { onMounted } from "vue";
 import { RealityCheckCardData } from "../types/types.ts";

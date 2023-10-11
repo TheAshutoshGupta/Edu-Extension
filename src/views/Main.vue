@@ -32,6 +32,11 @@
             class="card-sizing"
             :card-data="item"
           ></flash-card>
+          <reality-check-card
+            v-if="item.dataType == 'realitycheck'"
+            class="card-sizing"
+            :card-data="item"
+          ></reality-check-card>
         </template>
       </div>
     </div>
@@ -42,6 +47,7 @@
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import FlashCard from "../components/FlashCard.vue";
+import RealityCheckCard from "../components/RealityCheckCard.vue";
 import RewriteCard from "../components/RewriteCard.vue";
 import { useUserStore } from "../stores/UserStore";
 

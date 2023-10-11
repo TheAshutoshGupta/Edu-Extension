@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="d-flex align-items-center flex-column">
-      <div class="d-flex justify-content-center align-items-center w-100 mb-2">
+      <div
+        class="d-flex common-links justify-content-center align-items-center w-100 mb-2"
+      >
         <RewriteContentButton />
       </div>
       <div class="d-flex justify-content-center align-items-center w-100 mb-2">
