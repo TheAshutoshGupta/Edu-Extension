@@ -6,6 +6,7 @@ import Main from "../views/Main.vue";
 import Rewrite from "../views/Rewrite.vue";
 import RealityCheckMenu from "../views/RealityCheckMenu.vue";
 import UserSettings from "../views/UserSettings.vue";
+import RealityCheckView from "../views/RealityCheckView.vue";
 
 const routes = [
   {
@@ -48,6 +49,12 @@ const routes = [
     path: "/reality-check",
     name: "RealityCheck",
     component: RealityCheckMenu,
+  },
+  {
+    path: "/reality-check-view/:index",
+    name: "RealityCheckView",
+    component: RealityCheckView,
+    props: true,
   },
 ];
 
