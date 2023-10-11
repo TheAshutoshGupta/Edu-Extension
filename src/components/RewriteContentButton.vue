@@ -164,7 +164,7 @@ function replaceTextElements(
   // });
 
   // cap groupedParagraphs at X groups (for testing, uncomment to do entire document)
-  groupedParagraphs.splice(4);
+  // groupedParagraphs.splice(4);
 
   // get page URL
   const url: string = window.location.href;
@@ -294,7 +294,7 @@ function replaceTextElements(
           currentGroupNumber++;
           if (currentGroupNumber >= totalGroups) {
             // parsed each response, so let's sort them and throw in the user store
-            apiResponses.sort((a, b) => a.id - b.id);
+            apiResponses.sort((a: any, b: any) => a.id - b.id);
             // console.log(apiResponses);
 
             // drop any responses that don't have an id or if it is empty

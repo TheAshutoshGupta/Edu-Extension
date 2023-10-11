@@ -136,7 +136,7 @@ const makeFetchRequest = () => {
     groupedParagraphs.push(currentGroup);
 
     // cap groupedParagraphs at X groups (for testing, uncomment to do entire document)
-    groupedParagraphs.splice(1);
+    // groupedParagraphs.splice(1);
 
     // send groups to openai in a loop
 
