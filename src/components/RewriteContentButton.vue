@@ -46,7 +46,7 @@ function replaceTextElements(apiKey: string) {
     // can add more classes or tags to exclude here
     const isInHeaderFooterNavOrHasNavbox =
       paragraph.closest("header, footer, nav") ||
-      paragraph.closest(".navbox, .sidebar, .catlinks, .reflist");
+      paragraph.closest(".navbox, .sidebar, .catlinks, .reflist, .mwe-math-element");
 
     // If the paragraph isn't any of the above, add it to the final paragraphs array
     if (paragraphContent && isInHeaderFooterNavOrHasNavbox) {
@@ -145,7 +145,24 @@ function replaceTextElements(apiKey: string) {
   // });
 
   // cap groupedParagraphs at X groups (for testing, uncomment to do entire document)
-  groupedParagraphs.splice(1);
+  groupedParagraphs.splice(4);
+
+  // get page URL
+  const url: string = window.location.href;
+  // get page title
+  const title: string = document.title;
+  // get date
+  const date: string = new Date().toLocaleDateString();
+  const icon: string = "pencil";
+
+  interface ApiResponse {
+    id: string;
+    response: string;
+  }
+
+  const apiResponses: ApiResponse[] = [];
+  const totalGroups: number = groupedParagraphs.length;
+  let currentGroupNumber: number = 0;
 
   // send groups to openai in a loop
 
@@ -164,7 +181,31 @@ function replaceTextElements(apiKey: string) {
     console.log("Sending group to OpenAI");
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
-    let prompt = `You are a bot that rewrites content. You maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers or anything else. Please rewrite this content to match a 1st grade reading level:\n ${extractedParagraphsString}`;
+    let userPrompt = "You are a bot that rewrites content. You maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers, new lines, or anything else. Please rewrite this content to match a 1st grade reading level:\n1: Aerospace engineering is the primary field of engineering concerned with the development of aircraft and spacecraft.[3]  It has two major and overlapping branches: aeronautical engineering and astronautical engineering.  Avionics engineering is similar, but deals with the electronics side of aerospace engineering.\n4: Orville and Wilbur Wright flew the Wright Flyer in 1903 at Kitty Hawk, North Carolina.\n6: Early knowledge of aeronautical engineering was largely empirical, with some concepts and skills imported from other branches of engineering.[11] Some key elements, like fluid dynamics, were understood by 18th-century scientists.[12]\n7: In December 1903, the Wright Brothers performed the first sustained, controlled flight of a powered, heavier-than-air aircraft, lasting 12 seconds. The 1910s saw the development of aeronautical engineering through the design of World War I military aircraft.";
+
+    let assistantResponse = "1: Aerospace engineering is about making planes and spaceships. There are two main parts: aeronautical engineering and astronautical engineering. Avionics engineering is similar, but it focuses on the electronics.\n4: The Wright brothers were the first to fly an airplane in 1903.\n6: Early knowledge of aeronautical engineering was based on observation and trial and error. Some key ideas, like how fluids move, were already understood by scientists in the 1700s.\n7: In 1903, the Wright brothers flew the first airplane that could stay in the air. During World War I, aeronautical engineering grew because of the need to design military planes.";
+
+    let prompt = "Perfect formatting. As you know, you maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers, new lines, or anything else. For your next task, please rewrite this content as if you were speaking to "
+    let persona = "a 1st grader";
+    prompt += persona;
+    prompt += ":\n";
+    prompt += extractedParagraphsString;
+
+    let messages = [
+        {
+          role: "user",
+          content: userPrompt
+        },
+        {
+          role: "assistant",
+          content: assistantResponse
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+
 
     fetch(apiUrl, {
       method: "POST",
@@ -174,12 +215,7 @@ function replaceTextElements(apiKey: string) {
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
+        messages: messages,
         temperature: 0.9,
       }),
     })
@@ -195,14 +231,14 @@ function replaceTextElements(apiKey: string) {
           // works fine for now though and it isn't too noticable so....
           const responseParagraphs: string[] = response.split("\n");
           console.log(responseParagraphs);
+          // ugh, sometimes OpenAI straight up ignores the formatting and just rewrites content
+
+
           // create dict of responseParagraph ids and text (parse the response)
           interface responseParagraphDict {
             [key: string]: string;
           }
-          chrome.runtime.sendMessage({
-            action: "storeRewriteData",
-            content: response,
-          });
+
           const responseParagraphsDict: responseParagraphDict = {};
           responseParagraphs.forEach((responseParagraph) => {
             // id is at beginning of each paragraph, in the form 1: or 2: etc.
@@ -211,7 +247,39 @@ function replaceTextElements(apiKey: string) {
             // rejoin the rest of the paragraph since there may be more than one colon
             let replacementText = splitText.slice(1).join(": ");
             responseParagraphsDict[id] = replacementText;
+
+            
+
+            apiResponses.push({
+              id: id,
+              response: replacementText,
+            });
+            
           });
+
+          currentGroupNumber++;
+          if(currentGroupNumber >= totalGroups) {
+            // parsed each response, so let's sort them and throw in the user store
+            apiResponses.sort((a, b) => a.id - b.id);
+            console.log(apiResponses);
+
+            const groupedResponses: string = apiResponses.map((response) => response.id + ": " + response.response).join("\n");
+            console.log(groupedResponses);
+            
+            const cardData: RewriteCardData = {
+              dataType: "rewrite",
+              title: title,
+              url: url,
+              icon: icon,
+              dateAdded: date,
+              text: groupedResponses,
+            };
+            chrome.runtime.sendMessage({
+              action: "storeRewriteData",
+              content: cardData,
+            });
+          }
+
           // replace inner text of text nodes with the response text elements from OpenAI
           paragraphs.forEach((paragraph, index) => {
             // since paragraphs includes all paragraphs on the page, we need to check if the index is in the responseParagraphsDict for this specific openAI response
@@ -325,14 +393,7 @@ onMounted(() => {
         isLoading.value = false;
         console.log("Received storeRewrite message");
         console.log(request.content);
-        const cardData: RewriteCardData = {
-          dataType: "rewrite",
-          title: "test 1",
-          url: request.content,
-          text: "text",
-          icon: "pencil",
-          dateAdded: "",
-        };
+        const cardData: RewriteCardData = request.content;
         userStoreRef.rewriteCardData.value.push(cardData);
       } else {
         isLoading.value = false;
