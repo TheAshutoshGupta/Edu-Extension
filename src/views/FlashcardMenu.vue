@@ -4,7 +4,7 @@
       <NotecardButton></NotecardButton>
     </div>
     <div>
-      <p class="mb-2">Recent</p>
+      <h2 class="pb-1 fs-6 mb-1 fw-bold">Recent</h2>
       <div class="card-wrapper">
         <flash-card
           class="card-sizing"

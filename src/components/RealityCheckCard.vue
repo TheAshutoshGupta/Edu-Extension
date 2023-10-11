@@ -6,7 +6,7 @@
         :icon="faPencilAlt"
       />
       <p>{{ props.cardData.title }}</p>
-      <p>{{ props.cardData.flashCards.length }} Cards</p>
+      <p>{{ props.cardData.text }}</p>
     </div>
   </div>
 </template>
@@ -15,10 +15,10 @@
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { onMounted } from "vue";
-import { FlashCardData } from "../types/types.ts";
+import { RealityCheckCardData } from "../types/types.ts";
 
 type PropTypes = {
-  cardData: FlashCardData;
+  cardData: RealityCheckCardData;
 };
 
 const props = defineProps<PropTypes>();

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="d-flex flex-column" style="height: 80%">
     <p class="mb-2">Note Cards</p>
     <p class="mb-2 fw-bold">
       {{ userStoreRef.flashCardData.value[activeIndex].title }}
@@ -32,7 +32,7 @@
         Try Again
       </button>
     </div>
-    <div v-else class="d-flex flex-wrap">
+    <div v-else class="d-flex flex-wrap flex-grow-1">
       <div class="d-flex w-100 mb-2">
         <div
           v-if="showFront"

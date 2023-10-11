@@ -21,6 +21,7 @@ export interface FlashCard {
 export interface FlashCardData extends BaseBoltData {
   dataType: "flashcard";
   flashCards: FlashCard[];
+  id: string;
 }
 
 export interface RealityCheckCardData extends BaseBoltData {

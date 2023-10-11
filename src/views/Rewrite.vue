@@ -1,20 +1,29 @@
 <template>
   <div>
-    <div class="d-flex">
-      <RewriteContentButton />
-      <select v-model="selectedWritingStyle">
-        <option v-for="item in writingStyle">{{ item.text }}</option>
-      </select>
-      <select v-model="selectedLengthOption">
-        <option v-for="item in lengthOption">{{ item.text }}</option>
-      </select>
-      <input type="text" v-model="preexistingKnowledge" />
+    <div class="d-flex align-items-center flex-column">
+      <div class="d-flex justify-content-center align-items-center w-100 mb-2">
+        <RewriteContentButton />
+      </div>
+      <div class="d-flex justify-content-center align-items-center w-100 mb-2">
+        <select class="form-select me-1" v-model="selectedWritingStyle">
+          <option v-for="item in writingStyle">{{ item.text }}</option>
+        </select>
+        <select class="form-select me-1" v-model="selectedLengthOption">
+          <option v-for="item in lengthOption">{{ item.text }}</option>
+        </select>
+        <input
+          class="form-control me-1"
+          type="text"
+          v-model="preexistingKnowledge"
+          placeholder="Existing experience"
+        />
+      </div>
     </div>
-    <p>Recent</p>
-    <div>
+    <h2 class="pb-1 fs-6 fw-bold">Recent</h2>
+    <div class="card-wrapper">
       <rewrite-card
-        @click="openRewrittenContent(index)"
-        v-for="(item, index) in userStoreRef.rewriteCardData.value"
+        class="card-sizing"
+        v-for="item in userStoreRef.rewriteCardData.value"
         :card-data="item"
       ></rewrite-card>
     </div>
@@ -23,18 +32,27 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref, watch, onMounted } from "vue";
+import { onMounted, ref, watch } from "vue";
+import RewriteCard from "../components/RewriteCard.vue";
 import RewriteContentButton from "../components/RewriteContentButton.vue";
 import { useUserStore } from "../stores/UserStore";
-import RewriteCard from "../components/RewriteCard.vue";
-import { WritingStyle, LengthOption } from "../types/types";
+import { LengthOption, WritingStyle } from "../types/types";
 
 const userStore = useUserStore();
 const userStoreRef = storeToRefs(userStore);
 
-
-const writingStyle: WritingStyle[] = [{ text: "College" }, { text: "High School" }, { text: "Elementary"}, { text: "Casual and fun" }, { text: "Simplest" }];
-const lengthOption: LengthOption[] = [{ text: "Same" }, { text: "Shorter" }, { text: "Shortest" }];
+const writingStyle: WritingStyle[] = [
+  { text: "College" },
+  { text: "High School" },
+  { text: "Elementary" },
+  { text: "Casual and fun" },
+  { text: "Simplest" },
+];
+const lengthOption: LengthOption[] = [
+  { text: "Same" },
+  { text: "Shorter" },
+  { text: "Shortest" },
+];
 
 const selectedWritingStyle = ref<string>("");
 const selectedLengthOption = ref<string>("");
@@ -53,251 +71,28 @@ watch(selectedLengthOption, (newLengthOption) => {
 });
 
 watch(preexistingKnowledge, (newPreexistingKnowledge) => {
-  const newKnowledge = { text: newPreexistingKnowledge}
+  const newKnowledge = { text: newPreexistingKnowledge };
   console.log("Preexisting Knowledge changed to " + newPreexistingKnowledge);
   userStore.preexistingKnowledge = newKnowledge;
 });
-
-
-function openRewrittenContent(index: number) {
-  console.log("Opening rewritten content");
-  console.log(index);
-  const cardData = userStoreRef.rewriteCardData.value[index];
-  const url = cardData.url;
-  chrome.tabs.create({ url: url, active: false }, (tab) => {
-    console.log("Tab created: " + tab.id);
-    
-    if(cardData.text)
-    {
-      // Listen for tab update events
-      chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
-        // Wait for the tab to complete loading
-        if (tabId === tab.id && changeInfo.status === 'complete') {
-          // Execute your function after the tab has loaded
-          chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            func: reinsertGeneratedText,
-            args: [cardData.text],
-          });
-          // need to make tab active now, since we've had a chance to inject the script before the popup closes
-          chrome.tabs.update(tab.id, {active: true});
-
-        }
-      });
-    }
-  });
-}
-
-function reinsertGeneratedText(text: string | undefined) {
-  console.log("Reinserting generated text");
-  // I'm sorry Patrick, this is gonna be MESSY
-  // we will fix later after we win 🙂
-
-  // get all text elements (add or remove html tags as needed)
-  const allParagraphs = document.querySelectorAll("p, figcaption, li");
-  let paragraphText = "";
-
-  // Test Console Logs
-  paragraphText = "";
-  allParagraphs.forEach((paragraph) => {
-    const paragraphContent = paragraph?.textContent?.trim();
-    if (paragraphContent) {
-      paragraphText += paragraphContent + "\n";
-    }
-  });
-  console.log(paragraphText);
-  paragraphText = "";
-
-  // filtering out unwanted text
-  const paragraphs: Element[] = [];
-  // remove all paragraphs that are in a header, footer, or nav element or parent class is navbox
-  // Iterate over the selected elements and filter out unwanted ones
-  allParagraphs.forEach((paragraph) => {
-    const paragraphContent = paragraph?.textContent?.trim();
-
-    // Check if the paragraph is within a <header>, <footer>, or <nav> element or has the class 'navbox'
-    // can add more classes or tags to exclude here
-    const isInHeaderFooterNavOrHasNavbox =
-      paragraph.closest("header, footer, nav") ||
-      paragraph.closest(".navbox, .sidebar, .catlinks, .reflist, .mwe-math-element");
-
-    // If the paragraph isn't any of the above, add it to the final paragraphs array
-    if (paragraphContent && isInHeaderFooterNavOrHasNavbox) {
-      // this is a text element we do not want
-    } else if (paragraphContent) {
-      paragraphText += paragraphContent + "\n";
-      paragraphs.push(paragraph);
-    }
-  });
-
-  // console.log(paragraphText);
-
-  // just for printing / debug
-  paragraphs.forEach((paragraph) => {
-    const paragraphContent = paragraph?.textContent?.trim();
-    if (paragraphContent) {
-      console.log(paragraphContent);
-    }
-  });
-
-  // variable to store extracted paragraphs and their ids (ids are generated by us based on the order of the paragraphs)
-  interface ExtractedParagraph {
-    id: string;
-    content: string;
-  }
-  interface ExtractedLinks {
-    [key: string]: ExtractedLink;
-  }
-  interface ExtractedLink {
-    link: string;
-    paragraphId: Array<string | number>;
-  }
-
-  const extractedParagraphs: ExtractedParagraph[] = [];
-  // variable to store extracted links and the paragraphs that use them
-  const extractedLinks: ExtractedLinks = {};
-
-  paragraphs.forEach((paragraph, index) => {
-    const paragraphContent = paragraph?.textContent?.trim();
-    const paragraphId = index + 1;
-    if (paragraphContent) {
-      extractedParagraphs.push({
-        id: paragraphId.toString(),
-        content: paragraphContent || "",
-      });
-    }
-
-    // extract links from paragraph
-    const links = paragraph.querySelectorAll("a");
-    // find links within the paragraph and store their text and href in a dictionary that includes text, link, and paragraph ids
-    links.forEach((link) => {
-      const linkText = link?.textContent?.trim();
-      const linkHref = link?.href;
-      // if link already exists, add the paragraph id to the list of paragraphs that use it
-      // otherwise, create a new entry in the dictionary
-      if (linkText && linkHref) {
-        if (extractedLinks[linkText]) {
-          extractedLinks[linkText].paragraphId.push(paragraphId);
-        } else {
-          extractedLinks[linkText] = {
-            link: linkHref,
-            paragraphId: [paragraphId],
-          };
-        }
-      }
-    });
-  });
-
-  const response = text;
-
-  if(response)
-  {
-    const responseParagraphs: string[] = response.split("\n");
-    console.log(responseParagraphs);
-    // ugh, sometimes OpenAI straight up ignores the formatting and just rewrites content
-
-
-    // create dict of responseParagraph ids and text (parse the response)
-    interface responseParagraphDict {
-      [key: string]: string;
-    }
-
-    const responseParagraphsDict: responseParagraphDict = {};
-    responseParagraphs.forEach((responseParagraph) => {
-      // id is at beginning of each paragraph, in the form 1: or 2: etc.
-      const id = responseParagraph.split(": ")[0];
-      const splitText = responseParagraph.split(": ");
-      // rejoin the rest of the paragraph since there may be more than one colon
-      let replacementText = splitText.slice(1).join(": ");
-      responseParagraphsDict[id] = replacementText;
-      
-    });
-
-    paragraphs.forEach((paragraph, index) => {
-      // since paragraphs includes all paragraphs on the page, we need to check if the index is in the responseParagraphsDict for this specific openAI response
-      if (responseParagraphsDict[index + 1]) {
-        console.log(
-          "Original Paragraph " + index + ": " + paragraph.textContent
-        );
-        console.log(
-          "Replacement Paragraph: " +
-            (index + 1) +
-            ", " +
-            responseParagraphsDict[index + 1]
-        );
-
-        let replacementText = responseParagraphsDict[index + 1];
-
-        // go through, and wherever the link text is re-used, replace it with a link
-        for (const linkText in extractedLinks) {
-          if (replacementText.includes(linkText)) {
-            // also check if it belongs to same paragraph
-            // TODO: may need to add additional styling depending on page
-            if (
-              extractedLinks[linkText].paragraphId.includes(index + 1)
-            ) {
-              replacementText = replacementText.replace(
-                linkText,
-                `<a href="${extractedLinks[linkText].link}">${linkText}</a>`
-              );
-            }
-          }
-        }
-
-        // add the links that don't appear in the rewritten text below the paragraph
-        const realLinks = Object.keys(extractedLinks).filter(
-          (linkText) =>
-            extractedLinks[linkText].paragraphId.includes(index + 1) &&
-            !linkText.includes("[") &&
-            !linkText.includes("]") &&
-            !replacementText.includes(linkText)
-        );
-
-        if (realLinks.length > 0) {
-          const linksHtmtl = realLinks
-            .map(
-              (linkText) =>
-                `<a href="${extractedLinks[linkText].link}">${linkText}</a>`
-            )
-            .join(", ");
-          replacementText += "<br><br>Other Links: " + linksHtmtl;
-        }
-
-        // also add the references at the bottom
-        const refLinks = Object.keys(extractedLinks).filter(
-          (linkText) =>
-            extractedLinks[linkText].paragraphId.includes(index + 1) &&
-            linkText.includes("[") &&
-            linkText.includes("]")
-        );
-        if (refLinks.length > 0) {
-          const refLinksHtml = refLinks
-            .map(
-              (linkText) =>
-                `<a href="${extractedLinks[linkText].link}">${linkText}</a>`
-            )
-            .join(", ");
-          replacementText += `<br>References: ${refLinksHtml}`;
-        }
-
-        replacementText += "<br>";
-
-        // replace the text! 🤓
-        paragraph.innerHTML = replacementText;
-      }
-    });
-
-
-  }
-
-}
 
 onMounted(() => {
   selectedWritingStyle.value = userStore.selectedWritingStyle.text;
   selectedLengthOption.value = userStore.selectedLengthOption.text;
   preexistingKnowledge.value = userStore.preexistingKnowledge.text;
 });
-
 </script>
 
-<style scoped></style>
+<style scoped>
+.card-wrapper {
+  --cols: 2;
+  --gap: 15px;
+  display: flex;
+  gap: var(--gap);
+}
+.card-sizing {
+  flex-basis: calc(
+    100% / var(--cols) - var(--gap) / var(--cols) * (var(--cols) - 1)
+  );
+}
+</style>

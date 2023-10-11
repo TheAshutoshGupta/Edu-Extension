@@ -108,8 +108,7 @@ export const useUserStore = defineStore("UserStore", {
     ): Array<FlashCardData | RewriteCardData | RealityCheckCardData> => {
       const dataArray: Array<
         FlashCardData | RewriteCardData | RealityCheckCardData
-      > = state.rewriteCardData;
-      dataArray.concat(
+      > = [].concat(
         state.flashCardData,
         state.rewriteCardData,
         state.realityCheckCardData
