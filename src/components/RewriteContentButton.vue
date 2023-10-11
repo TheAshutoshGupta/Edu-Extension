@@ -11,7 +11,7 @@
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 import { useUserStore } from "../stores/UserStore";
-import { RewriteCardData } from "../types/types";
+import { LengthOption, PreexistingKnowledge, RewriteCardData, WritingStyle } from "../types/types";
 
 const isLoading = ref(false);
 const userStore = useUserStore();
@@ -19,7 +19,9 @@ const userStoreRef = storeToRefs(userStore);
 
 const apiKey = userStoreRef.userPrefs.value.password;
 
-function replaceTextElements(apiKey: string) {
+function replaceTextElements(apiKey: String, selectedWritingStyle: WritingStyle, selectedLengthOption: LengthOption, preexistingKnowledge: PreexistingKnowledge) {
+
+
   // get all text elements (add or remove html tags as needed)
   const allParagraphs = document.querySelectorAll("p, figcaption, li");
   let paragraphText = "";
@@ -46,7 +48,7 @@ function replaceTextElements(apiKey: string) {
     // can add more classes or tags to exclude here
     const isInHeaderFooterNavOrHasNavbox =
       paragraph.closest("header, footer, nav") ||
-      paragraph.closest(".navbox, .sidebar, .catlinks, .reflist");
+      paragraph.closest(".navbox, .sidebar, .catlinks, .reflist, .mwe-math-element");
 
     // If the paragraph isn't any of the above, add it to the final paragraphs array
     if (paragraphContent && isInHeaderFooterNavOrHasNavbox) {
@@ -63,7 +65,7 @@ function replaceTextElements(apiKey: string) {
   paragraphs.forEach((paragraph) => {
     const paragraphContent = paragraph?.textContent?.trim();
     if (paragraphContent) {
-      console.log(paragraphContent);
+      // console.log(paragraphContent);
     }
   });
 
@@ -145,7 +147,24 @@ function replaceTextElements(apiKey: string) {
   // });
 
   // cap groupedParagraphs at X groups (for testing, uncomment to do entire document)
-  groupedParagraphs.splice(1);
+  groupedParagraphs.splice(4);
+
+  // get page URL
+  const url: string = window.location.href;
+  // get page title
+  const title: string = document.title;
+  // get date
+  const date: string = new Date().toLocaleDateString();
+  const icon: string = "pencil";
+
+  interface ApiResponse {
+    id: string;
+    response: string;
+  }
+
+  const apiResponses: ApiResponse[] = [];
+  const totalGroups: number = groupedParagraphs.length;
+  let currentGroupNumber: number = 0;
 
   // send groups to openai in a loop
 
@@ -164,7 +183,42 @@ function replaceTextElements(apiKey: string) {
     console.log("Sending group to OpenAI");
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
-    let prompt = `You are a bot that rewrites content. You maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers or anything else. Please rewrite this content to match a 1st grade reading level:\n ${extractedParagraphsString}`;
+    let userPrompt = "You are a bot that rewrites content. You maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers, new lines, or anything else. Please rewrite this content to match a 1st grade reading level:\n1: Aerospace engineering is the primary field of engineering concerned with the development of aircraft and spacecraft.[3]  It has two major and overlapping branches: aeronautical engineering and astronautical engineering.  Avionics engineering is similar, but deals with the electronics side of aerospace engineering.\n4: Orville and Wilbur Wright flew the Wright Flyer in 1903 at Kitty Hawk, North Carolina.\n6: Early knowledge of aeronautical engineering was largely empirical, with some concepts and skills imported from other branches of engineering.[11] Some key elements, like fluid dynamics, were understood by 18th-century scientists.[12]\n7: In December 1903, the Wright Brothers performed the first sustained, controlled flight of a powered, heavier-than-air aircraft, lasting 12 seconds. The 1910s saw the development of aeronautical engineering through the design of World War I military aircraft.";
+
+    let assistantResponse = "1: Aerospace engineering is about making planes and spaceships. There are two main parts: aeronautical engineering and astronautical engineering. Avionics engineering is similar, but it focuses on the electronics.\n4: The Wright brothers were the first to fly an airplane in 1903.\n6: Early knowledge of aeronautical engineering was based on observation and trial and error. Some key ideas, like how fluids move, were already understood by scientists in the 1700s.\n7: In 1903, the Wright brothers flew the first airplane that could stay in the air. During World War I, aeronautical engineering grew because of the need to design military planes.";
+
+    let prompt = "Perfect formatting. As you know, you maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers, new lines, or anything else. For your next task, please rewrite this content at a "
+    prompt += selectedWritingStyle.text;
+    prompt += " level, and make each section "
+    prompt += selectedLengthOption.text;
+    prompt += " length";
+    if(preexistingKnowledge.text) {
+      prompt += ", I am skilled in: "
+      prompt += preexistingKnowledge.text;
+      prompt += ", so please use that knowledge to help rewrite this content, using metaphors that would help my understanding."
+      prompt += "\nContent"
+    }
+    prompt += ":\n";
+
+    console.log(prompt);
+
+    prompt += extractedParagraphsString;
+
+    let messages = [
+        {
+          role: "user",
+          content: userPrompt
+        },
+        {
+          role: "assistant",
+          content: assistantResponse
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+
 
     fetch(apiUrl, {
       method: "POST",
@@ -174,35 +228,37 @@ function replaceTextElements(apiKey: string) {
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
+        messages: messages,
         temperature: 0.9,
       }),
     })
       .then((response) => response.json())
       .then((responseData) => {
         //console.log(responseData);
-        const response = responseData["choices"][0]["message"]["content"];
+        let response = responseData["choices"][0]["message"]["content"];
         console.log("OpenAI Response:");
         console.log(response);
         if (response) {
+
+          // according to our format, there should never be more than one new line in a row, including whitespace
+          // let's replace all instances of more than one newline with a single newline
+          response = response.replace(/(\\n\s*){2,}/g, "\n");
+          response = response.replace(/(\D{1,}: )/g, "");
+
+
           // get the paragraphs by splitting the response on newlines
           // TODO: This breaks if a page uses newlines within a single element
           // works fine for now though and it isn't too noticable so....
           const responseParagraphs: string[] = response.split("\n");
-          console.log(responseParagraphs);
+          // console.log(responseParagraphs);
+          // ugh, sometimes OpenAI straight up ignores the formatting and just rewrites content
+
+
           // create dict of responseParagraph ids and text (parse the response)
           interface responseParagraphDict {
             [key: string]: string;
           }
-          chrome.runtime.sendMessage({
-            action: "storeRewriteData",
-            content: response,
-          });
+
           const responseParagraphsDict: responseParagraphDict = {};
           responseParagraphs.forEach((responseParagraph) => {
             // id is at beginning of each paragraph, in the form 1: or 2: etc.
@@ -211,24 +267,63 @@ function replaceTextElements(apiKey: string) {
             // rejoin the rest of the paragraph since there may be more than one colon
             let replacementText = splitText.slice(1).join(": ");
             responseParagraphsDict[id] = replacementText;
+
+            
+
+            apiResponses.push({
+              id: id,
+              response: replacementText,
+            });
+            
           });
+
+          currentGroupNumber++;
+          if(currentGroupNumber >= totalGroups) {
+            // parsed each response, so let's sort them and throw in the user store
+            apiResponses.sort((a, b) => a.id - b.id);
+            // console.log(apiResponses);
+
+            // drop any responses that don't have an id or if it is empty
+            apiResponses.filter((response) => response.id != "" && response.response != "\n");
+            const groupedResponses: string = apiResponses.map((response) => response.id + ": " + response.response).join("\n");
+            // console.log(groupedResponses);
+
+            
+            const cardData: RewriteCardData = {
+              dataType: "rewrite",
+              title: title,
+              url: url,
+              icon: icon,
+              dateAdded: date,
+              text: groupedResponses,
+              writingStyle: selectedWritingStyle,
+              lengthOption: selectedLengthOption,
+              preexistingKnowledge: preexistingKnowledge,
+            };
+            chrome.runtime.sendMessage({
+              action: "storeRewriteData",
+              content: cardData,
+            });
+          }
+
           // replace inner text of text nodes with the response text elements from OpenAI
           paragraphs.forEach((paragraph, index) => {
             // since paragraphs includes all paragraphs on the page, we need to check if the index is in the responseParagraphsDict for this specific openAI response
             if (responseParagraphsDict[index + 1]) {
-              console.log(
-                "Original Paragraph " + index + ": " + paragraph.textContent
-              );
-              console.log(
-                "Replacement Paragraph: " +
-                  (index + 1) +
-                  ", " +
-                  responseParagraphsDict[index + 1]
-              );
+              // console.log(
+              //   "Original Paragraph " + index + ": " + paragraph.textContent
+              // );
+              // console.log(
+              //   "Replacement Paragraph: " +
+              //     (index + 1) +
+              //     ", " +
+              //     responseParagraphsDict[index + 1]
+              // );
 
               let replacementText = responseParagraphsDict[index + 1];
 
               // go through, and wherever the link text is re-used, replace it with a link
+              // TODO: this link replacement is case sensitive, may want to change that.
               for (const linkText in extractedLinks) {
                 if (replacementText.includes(linkText)) {
                   // also check if it belongs to same paragraph
@@ -297,6 +392,12 @@ function replaceTextElements(apiKey: string) {
 const getPageContent = () => {
   isLoading.value = true;
 
+  const selectedWritingStyle = userStoreRef.selectedWritingStyle.value;
+  const selectedLengthOption = userStoreRef.selectedLengthOption.value;
+  const preexistingKnowledge = userStoreRef.preexistingKnowledge.value;
+
+
+
   // get active tab and execute replaceTextElements on it
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs && tabs.length > 0) {
@@ -307,7 +408,7 @@ const getPageContent = () => {
         chrome.scripting.executeScript({
           target: { tabId: activeTab.id },
           func: replaceTextElements,
-          args: [apiKey],
+          args: [apiKey, selectedWritingStyle, selectedLengthOption, preexistingKnowledge],
         });
       } else {
         console.error("Error: Invalid tab object");
@@ -325,14 +426,7 @@ onMounted(() => {
         isLoading.value = false;
         console.log("Received storeRewrite message");
         console.log(request.content);
-        const cardData: RewriteCardData = {
-          dataType: "rewrite",
-          title: "test 1",
-          url: request.content,
-          text: "text",
-          icon: "pencil",
-          dateAdded: "",
-        };
+        const cardData: RewriteCardData = request.content;
         userStoreRef.rewriteCardData.value.push(cardData);
       } else {
         isLoading.value = false;
