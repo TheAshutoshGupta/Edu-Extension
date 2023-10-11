@@ -5,14 +5,20 @@ import {
   BoltUserPrefs,
   FlashCardData,
   FlashCardTestProgressData,
+  LengthOption,
+  PreexistingKnowledge,
   RealityCheckCardData,
   RewriteCardData,
+  WritingStyle,
 } from "../types/types";
 
 interface State {
   flashCardData: FlashCardData[];
   rewriteCardData: RewriteCardData[];
   realityCheckCardData: RealityCheckCardData[];
+  selectedWritingStyle: WritingStyle;
+  selectedLengthOption: LengthOption;
+  preexistingKnowledge: PreexistingKnowledge;
 }
 
 const defaultFlashCardTestProgressData: FlashCardTestProgressData = {
@@ -44,6 +50,33 @@ export const useUserStore = defineStore("UserStore", {
     realityCheckCardData: useStorage<RealityCheckCardData[]>(
       "bolt-reality-check-data",
       [],
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
+    selectedWritingStyle: useStorage<WritingStyle>(
+      "bolt-selected-writing-style",
+      { text: "" } as WritingStyle,
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
+    selectedLengthOption: useStorage<LengthOption>(
+      "bolt-selected-length-option",
+      { text: "Same" } as LengthOption,
+      localStorage,
+      {
+        mergeDefaults: (storageValue, defaults) =>
+          merge(defaults, storageValue),
+      }
+    ),
+    preexistingKnowledge: useStorage<PreexistingKnowledge>(
+      "bolt-preexisting-knowledge",
+      { text: "" } as PreexistingKnowledge,
       localStorage,
       {
         mergeDefaults: (storageValue, defaults) =>

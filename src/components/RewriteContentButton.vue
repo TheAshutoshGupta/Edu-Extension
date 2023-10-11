@@ -11,7 +11,7 @@
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 import { useUserStore } from "../stores/UserStore";
-import { RewriteCardData } from "../types/types";
+import { LengthOption, PreexistingKnowledge, RewriteCardData, WritingStyle } from "../types/types";
 
 const isLoading = ref(false);
 const userStore = useUserStore();
@@ -19,7 +19,9 @@ const userStoreRef = storeToRefs(userStore);
 
 const apiKey = userStoreRef.userPrefs.value.password;
 
-function replaceTextElements(apiKey: string) {
+function replaceTextElements(apiKey: String, selectedWritingStyle: WritingStyle, selectedLengthOption: LengthOption, preexistingKnowledge: PreexistingKnowledge) {
+
+
   // get all text elements (add or remove html tags as needed)
   const allParagraphs = document.querySelectorAll("p, figcaption, li");
   let paragraphText = "";
@@ -63,7 +65,7 @@ function replaceTextElements(apiKey: string) {
   paragraphs.forEach((paragraph) => {
     const paragraphContent = paragraph?.textContent?.trim();
     if (paragraphContent) {
-      console.log(paragraphContent);
+      // console.log(paragraphContent);
     }
   });
 
@@ -185,10 +187,21 @@ function replaceTextElements(apiKey: string) {
 
     let assistantResponse = "1: Aerospace engineering is about making planes and spaceships. There are two main parts: aeronautical engineering and astronautical engineering. Avionics engineering is similar, but it focuses on the electronics.\n4: The Wright brothers were the first to fly an airplane in 1903.\n6: Early knowledge of aeronautical engineering was based on observation and trial and error. Some key ideas, like how fluids move, were already understood by scientists in the 1700s.\n7: In 1903, the Wright brothers flew the first airplane that could stay in the air. During World War I, aeronautical engineering grew because of the need to design military planes.";
 
-    let prompt = "Perfect formatting. As you know, you maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers, new lines, or anything else. For your next task, please rewrite this content as if you were speaking to "
-    let persona = "a 1st grader";
-    prompt += persona;
+    let prompt = "Perfect formatting. As you know, you maintain the format, rewriting the content in place, aiming for a similar number of characters for each section. Maintain the same format as the input, with ids. Keep the same ids. If there is a blank, leave it there. Do NOT add headers, new lines, or anything else. For your next task, please rewrite this content at a "
+    prompt += selectedWritingStyle.text;
+    prompt += " level, and make each section "
+    prompt += selectedLengthOption.text;
+    prompt += " length";
+    if(preexistingKnowledge.text) {
+      prompt += ", I am skilled in: "
+      prompt += preexistingKnowledge.text;
+      prompt += ", so please use that knowledge to help rewrite this content, using metaphors that would help my understanding."
+      prompt += "\nContent"
+    }
     prompt += ":\n";
+
+    console.log(prompt);
+
     prompt += extractedParagraphsString;
 
     let messages = [
@@ -222,15 +235,22 @@ function replaceTextElements(apiKey: string) {
       .then((response) => response.json())
       .then((responseData) => {
         //console.log(responseData);
-        const response = responseData["choices"][0]["message"]["content"];
+        let response = responseData["choices"][0]["message"]["content"];
         console.log("OpenAI Response:");
         console.log(response);
         if (response) {
+
+          // according to our format, there should never be more than one new line in a row, including whitespace
+          // let's replace all instances of more than one newline with a single newline
+          response = response.replace(/(\\n\s*){2,}/g, "\n");
+          response = response.replace(/(\D{1,}: )/g, "");
+
+
           // get the paragraphs by splitting the response on newlines
           // TODO: This breaks if a page uses newlines within a single element
           // works fine for now though and it isn't too noticable so....
           const responseParagraphs: string[] = response.split("\n");
-          console.log(responseParagraphs);
+          // console.log(responseParagraphs);
           // ugh, sometimes OpenAI straight up ignores the formatting and just rewrites content
 
 
@@ -261,12 +281,12 @@ function replaceTextElements(apiKey: string) {
           if(currentGroupNumber >= totalGroups) {
             // parsed each response, so let's sort them and throw in the user store
             apiResponses.sort((a, b) => a.id - b.id);
-            console.log(apiResponses);
+            // console.log(apiResponses);
 
             // drop any responses that don't have an id or if it is empty
             apiResponses.filter((response) => response.id != "" && response.response != "\n");
             const groupedResponses: string = apiResponses.map((response) => response.id + ": " + response.response).join("\n");
-            console.log(groupedResponses);
+            // console.log(groupedResponses);
 
             
             const cardData: RewriteCardData = {
@@ -276,6 +296,9 @@ function replaceTextElements(apiKey: string) {
               icon: icon,
               dateAdded: date,
               text: groupedResponses,
+              writingStyle: selectedWritingStyle,
+              lengthOption: selectedLengthOption,
+              preexistingKnowledge: preexistingKnowledge,
             };
             chrome.runtime.sendMessage({
               action: "storeRewriteData",
@@ -287,19 +310,20 @@ function replaceTextElements(apiKey: string) {
           paragraphs.forEach((paragraph, index) => {
             // since paragraphs includes all paragraphs on the page, we need to check if the index is in the responseParagraphsDict for this specific openAI response
             if (responseParagraphsDict[index + 1]) {
-              console.log(
-                "Original Paragraph " + index + ": " + paragraph.textContent
-              );
-              console.log(
-                "Replacement Paragraph: " +
-                  (index + 1) +
-                  ", " +
-                  responseParagraphsDict[index + 1]
-              );
+              // console.log(
+              //   "Original Paragraph " + index + ": " + paragraph.textContent
+              // );
+              // console.log(
+              //   "Replacement Paragraph: " +
+              //     (index + 1) +
+              //     ", " +
+              //     responseParagraphsDict[index + 1]
+              // );
 
               let replacementText = responseParagraphsDict[index + 1];
 
               // go through, and wherever the link text is re-used, replace it with a link
+              // TODO: this link replacement is case sensitive, may want to change that.
               for (const linkText in extractedLinks) {
                 if (replacementText.includes(linkText)) {
                   // also check if it belongs to same paragraph
@@ -368,6 +392,12 @@ function replaceTextElements(apiKey: string) {
 const getPageContent = () => {
   isLoading.value = true;
 
+  const selectedWritingStyle = userStoreRef.selectedWritingStyle.value;
+  const selectedLengthOption = userStoreRef.selectedLengthOption.value;
+  const preexistingKnowledge = userStoreRef.preexistingKnowledge.value;
+
+
+
   // get active tab and execute replaceTextElements on it
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs && tabs.length > 0) {
@@ -378,7 +408,7 @@ const getPageContent = () => {
         chrome.scripting.executeScript({
           target: { tabId: activeTab.id },
           func: replaceTextElements,
-          args: [apiKey],
+          args: [apiKey, selectedWritingStyle, selectedLengthOption, preexistingKnowledge],
         });
       } else {
         console.error("Error: Invalid tab object");

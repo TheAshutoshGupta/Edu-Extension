@@ -6,6 +6,9 @@
         :icon="faPencilAlt"
       />
       <p>{{ props.cardData.title }}</p>
+      <p>{{ props.cardData.writingStyle.text }}</p>
+      <p>{{ props.cardData.lengthOption.text }}</p>
+      <p>{{ props.cardData.preexistingKnowledge?.text }}</p>
     </div>
   </div>
 </template>

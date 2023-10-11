@@ -7,10 +7,10 @@
 
     <div class="d-flex">
       <RewriteContentButton />
-      <select>
+      <select v-model="selectedWritingStyle">
         <option v-for="item in writingStyle">{{ item.text }}</option>
       </select>
-      <select>
+      <select v-model="selectedLengthOption">
         <option v-for="item in lengthOption">{{ item.text }}</option>
       </select>
       <input type="text" v-model="preexistingKnowledge" />
@@ -28,24 +28,40 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 import RewriteContentButton from "../components/RewriteContentButton.vue";
 import { useUserStore } from "../stores/UserStore";
 import RewriteCard from "../components/RewriteCard.vue";
+import { WritingStyle, LengthOption } from "../types/types";
 
 const userStore = useUserStore();
 const userStoreRef = storeToRefs(userStore);
 
-interface WritingStyle {
-  text: string;
-}
-interface LengthOption {
-  text: string;
-}
 
-const writingStyle: WritingStyle[] = [{ text: "hello" }];
-const lengthOption: LengthOption[] = [{ text: "Same" }];
+const writingStyle: WritingStyle[] = [{ text: "College" }, { text: "High School" }, { text: "Elementary"}, { text: "Casual and fun" }, { text: "Simplest" }];
+const lengthOption: LengthOption[] = [{ text: "Same" }, { text: "Shorter" }, { text: "Shortest" }];
+
+const selectedWritingStyle = ref<string>("");
+const selectedLengthOption = ref<string>("");
 const preexistingKnowledge = ref<string>("");
+
+watch(selectedWritingStyle, (newWritingStyle) => {
+  const newStyle: WritingStyle = { text: newWritingStyle };
+  console.log("Writing Style changed to " + newWritingStyle);
+  userStore.selectedWritingStyle = newStyle;
+});
+
+watch(selectedLengthOption, (newLengthOption) => {
+  const newOption: LengthOption = { text: newLengthOption };
+  console.log("Length Option changed to " + newLengthOption);
+  userStore.selectedLengthOption = newOption;
+});
+
+watch(preexistingKnowledge, (newPreexistingKnowledge) => {
+  const newKnowledge = { text: newPreexistingKnowledge}
+  console.log("Preexisting Knowledge changed to " + newPreexistingKnowledge);
+  userStore.preexistingKnowledge = newKnowledge;
+});
 
 
 function openRewrittenContent(index: number) {
@@ -280,6 +296,12 @@ function reinsertGeneratedText(text: string | undefined) {
   }
 
 }
+
+onMounted(() => {
+  selectedWritingStyle.value = userStore.selectedWritingStyle.text;
+  selectedLengthOption.value = userStore.selectedLengthOption.text;
+  preexistingKnowledge.value = userStore.preexistingKnowledge.text;
+});
 
 </script>
 

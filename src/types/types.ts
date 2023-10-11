@@ -8,6 +8,9 @@ export interface BaseBoltData {
 
 export interface RewriteCardData extends BaseBoltData {
   dataType: "rewrite";
+  writingStyle: WritingStyle;
+  lengthOption: LengthOption;
+  preexistingKnowledge?: PreexistingKnowledge;
 }
 
 export interface FlashCard {
@@ -40,4 +43,14 @@ export interface FlashCardTestProgressData {
   flashCardGroupIndex: number;
   currentFlashCardIndex: number;
   flashCardProgress: FlashCardProgress;
+}
+
+export interface WritingStyle {
+  text: string;
+}
+export interface LengthOption {
+  text: string;
+}
+export interface PreexistingKnowledge {
+  text: string;
 }
