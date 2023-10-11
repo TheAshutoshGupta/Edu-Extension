@@ -1,24 +1,29 @@
 <template>
   <div class="w-100">
-    <p>{{ props.index }}</p>
-    <p class="mb-1 fs-6"><h2>{{ userStoreRef.realityCheckCardData.value[props.index].title }} Reality Check</h2></p>
+    <p class="mb-1 fs-6"><h2 class="mb-3 fs-5 fw-bold">{{ userStoreRef.realityCheckCardData.value[props.index].title }} Reality Check</h2></p>
     <div></div>
     <div>
-      <h3>Logical Fallacies:</h3>
+      <h3 class="mb-1 fs-6 fw-bold">Logical Fallacies:</h3>
       <div  v-for="item in userStoreRef.realityCheckCardData.value[props.index]['Logical Fallacies']">
-        <p class="fw-bold">{{ item }}</p>
+        <ol>
+          <li><p class="">{{ item }}</p></li>
+        </ol>
       </div>
-      <h3>Biased Statements:</h3>
+      <h3 class="mb-1 fs-6 fw-bold">Biased Statements:</h3>
       <div  v-for="item in userStoreRef.realityCheckCardData.value[props.index]['Biased Statements']">
-        <p class="fw-bold">{{ item }}</p>
+        <p class="">{{ item }}</p>
       </div>
-      <h3>Unsupported Arguments</h3>
+      <h3 class="mb-1 fs-6 fw-bold">Unsupported Arguments</h3>
       <div v-for="item in userStoreRef.realityCheckCardData.value[props.index]['Unsupported Arguments']">
-        <p class="fw-bold">{{ item }}</p>
+        <p class="">{{ item }}</p>
       </div>
-      <h3>Questions for further exploration:</h3>
-      <div @click="openLink(item)" v-for="item in userStoreRef.realityCheckCardData.value[props.index]['Questions for Further Exploration']">
-        <ul><a class="fw-bold" href="">{{ item }}</a></ul>
+      <h3 class="mb-1 fs-6 fw-bold">Questions for further exploration:</h3>
+      <div>
+        <ol>
+          <li v-for="item in userStoreRef.realityCheckCardData.value[props.index]['Questions for Further Exploration']">
+            <a  @click.prevent="openLink(item)" class="" href="#">{{ item }}</a>
+          </li>
+        </ol>
       </div>
     </div>
   </div>
@@ -26,9 +31,9 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
+import { onMounted } from "vue";
 import { useUserStore } from "../stores/UserStore";
 import { RealityCheckCardData } from "../types/types";
-import { onMounted } from "vue";
 
 
 const userStore = useUserStore();

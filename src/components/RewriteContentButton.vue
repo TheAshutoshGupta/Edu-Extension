@@ -1,6 +1,8 @@
 <template>
   <div>
-    <p v-if="isLoading">loading</p>
+    <div v-if="isLoading" class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
     <button
       v-else
       type="button"

@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-wrap">
+  <div class="d-flex flex-wrap" style="cursor: pointer">
     <div class="w-100 bg-light rounded-3 p-3 position-relative">
       <font-awesome-icon
         class="position-absolute rounded-pill bg-dark text-white p-2 card-icon"

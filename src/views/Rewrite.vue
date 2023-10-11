@@ -22,7 +22,7 @@
       </div>
     </div>
     <h2 class="pb-1 fs-6 fw-bold">Recent</h2>
-    <div class="card-wrapper">
+    <div class="card-wrapper flex-wrap">
       <rewrite-card
         class="card-sizing"
         v-for="item in userStoreRef.rewriteCardData.value"
