@@ -3,5 +3,12 @@
   "name": "Bolt - Learning Toolkit",
   "version": "1.0.0",
   "action": { "default_popup": "index.html" },
-  "permissions": ["storage", "activeTab", "scripting"]
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "host_permissions": ["https://*/*"]
 }

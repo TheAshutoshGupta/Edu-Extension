@@ -263,8 +263,11 @@ function replaceTextElements(apiKey: string) {
             apiResponses.sort((a, b) => a.id - b.id);
             console.log(apiResponses);
 
+            // drop any responses that don't have an id or if it is empty
+            apiResponses.filter((response) => response.id != "" && response.response != "\n");
             const groupedResponses: string = apiResponses.map((response) => response.id + ": " + response.response).join("\n");
             console.log(groupedResponses);
+
             
             const cardData: RewriteCardData = {
               dataType: "rewrite",
