@@ -87,7 +87,7 @@ function reinsertGeneratedText(text: string | undefined) {
     const isInHeaderFooterNavOrHasNavbox =
       paragraph.closest("header, footer, nav") ||
       paragraph.closest(
-        ".navbox, .sidebar, .catlinks, .reflist, .mwe-math-element"
+        ".navbox, .sidebar, .catlinks, .reflist, .mwe-math-element, .document-sidebar-rel-art"
       );
 
     // If the paragraph isn't any of the above, add it to the final paragraphs array
