@@ -8,7 +8,7 @@
         >Rewriter</router-link
       >
       <router-link
-        to="/critical-thinking"
+        to="/reality-check"
         class="btn btn-dark btn-sm rounded-pill px-3 py-1"
         >Critical Thinker</router-link
       >
