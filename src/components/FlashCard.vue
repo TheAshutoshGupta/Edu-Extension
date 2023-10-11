@@ -5,7 +5,7 @@
         class="position-absolute rounded-pill bg-dark text-white p-2 card-icon"
         :icon="faBook"
       />
-      <p>{{ props.cardData.title }}</p>
+      <p class="fw-bold">{{ props.cardData.title }}</p>
       <p>{{ props.cardData.flashCards.length }} Cards</p>
     </div>
   </div>

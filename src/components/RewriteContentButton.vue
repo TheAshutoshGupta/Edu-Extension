@@ -6,7 +6,7 @@
     <button
       v-else
       type="button"
-      class="btn btn-sm btn-dark rounded-pill"
+      class="btn btn-sm btn-dark rounded-pill px-3 py-2 fw-bold"
       @click="getPageContent"
     >
       Rewrite page content

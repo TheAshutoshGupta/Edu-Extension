@@ -6,7 +6,7 @@
     <button
       v-else
       type="button"
-      class="btn btn-sm btn-dark rounded-pill"
+      class="btn btn-sm btn-dark rounded-pill px-3 py-2 fw-bold"
       @click="makeFetchRequest()"
     >
       Reality Check
@@ -241,8 +241,12 @@ const makeFetchRequest = () => {
                   responseJson["Logical Fallacies"].forEach(
                     (fallacy: string) => {
                       // check for "None" or "N/A" and ignore
-                      if(fallacy.toLowerCase() !== "none" && fallacy.toLowerCase() !== "n/a" && fallacy.toLowerCase() !== "na" && !fallacy.toLowerCase().startsWith("none"))
-                      {
+                      if (
+                        fallacy.toLowerCase() !== "none" &&
+                        fallacy.toLowerCase() !== "n/a" &&
+                        fallacy.toLowerCase() !== "na" &&
+                        !fallacy.toLowerCase().startsWith("none")
+                      ) {
                         logicalFallacies.push(fallacy);
                       }
                     }
@@ -252,8 +256,12 @@ const makeFetchRequest = () => {
                 if (responseJson["Biased Statements"].length > 0) {
                   responseJson["Biased Statements"].forEach(
                     (statement: string) => {
-                      if(statement.toLowerCase() !== "none" && statement.toLowerCase() !== "n/a" && statement.toLowerCase() !== "na" && !statement.toLowerCase().startsWith("none"))
-                      {
+                      if (
+                        statement.toLowerCase() !== "none" &&
+                        statement.toLowerCase() !== "n/a" &&
+                        statement.toLowerCase() !== "na" &&
+                        !statement.toLowerCase().startsWith("none")
+                      ) {
                         biasedStatements.push(statement);
                       }
                     }
@@ -263,8 +271,12 @@ const makeFetchRequest = () => {
                 if (responseJson["Unsupported Arguments"].length > 0) {
                   responseJson["Unsupported Arguments"].forEach(
                     (argument: string) => {
-                      if(argument.toLowerCase() !== "none" && argument.toLowerCase() !== "n/a" && argument.toLowerCase() !== "na" && !argument.toLowerCase().startsWith("none"))
-                      {
+                      if (
+                        argument.toLowerCase() !== "none" &&
+                        argument.toLowerCase() !== "n/a" &&
+                        argument.toLowerCase() !== "na" &&
+                        !argument.toLowerCase().startsWith("none")
+                      ) {
                         unsupportedArguments.push(argument);
                       }
                     }
@@ -276,8 +288,12 @@ const makeFetchRequest = () => {
                 ) {
                   responseJson["Questions for Critical Thinking"].forEach(
                     (question: string) => {
-                          if(question.toLowerCase() !== "none" && question.toLowerCase() !== "n/a" && question.toLowerCase() !== "na" && !question.toLowerCase().startsWith("none"))
-                      {
+                      if (
+                        question.toLowerCase() !== "none" &&
+                        question.toLowerCase() !== "n/a" &&
+                        question.toLowerCase() !== "na" &&
+                        !question.toLowerCase().startsWith("none")
+                      ) {
                         questionsForFurtherExploration.push(question);
                       }
                     }

@@ -1,15 +1,15 @@
 <template>
   <div>
-    <div class="d-flex align-items-center">
-      <div class="flex-grow-1">
-        <p class="mb-1">Note Cards</p>
-        <p class="mb-1 fw-bold">
+    <div class="d-flex align-items-center mb-2">
+      <div class="flex-grow-1 mb-2">
+        <p class="mb-2">Note Cards</p>
+        <p class="mb-2 fw-bold">
           {{ userStoreRef.flashCardData.value[props.id].title }}
         </p>
       </div>
       <div>
         <button
-          class="btn btn-dark btn-sm mb-2 rounded-pill"
+          class="btn btn-dark btn-sm mb-2 rounded-pill px-3 py-2 fw-bold"
           @click="
             $router.push({
               path: `/flash-card-test/${props.id}`,

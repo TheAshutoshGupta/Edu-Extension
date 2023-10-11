@@ -7,7 +7,7 @@
     </div>
     <div>
       <h2 class="pb-1 fs-6 mb-1 fw-bold">Recent</h2>
-      <div class="card-wrapper">
+      <div class="card-wrapper flex-wrap">
         <flash-card
           class="card-sizing"
           @click="

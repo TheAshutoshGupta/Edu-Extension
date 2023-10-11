@@ -1,25 +1,25 @@
 <template>
   <div class="w-100 h-100">
-    <p class="mb-2 fs-6">Quick Actions</p>
-    <div class="d-flex common-links mb-2">
+    <p class="mb-2 fs-6 fw-bold">Quick Actions</p>
+    <div class="d-flex common-links mb-3">
       <router-link
         to="/rewrite"
-        class="btn btn-dark btn-sm rounded-pill px-2 py-1"
+        class="btn btn-dark btn-sm rounded-pill px-3 py-2 fw-bold"
         >Rewriter</router-link
       >
       <router-link
         to="/reality-check"
-        class="btn btn-dark btn-sm rounded-pill px-3 py-1"
-        >Critical Thinker</router-link
+        class="btn btn-dark btn-sm rounded-pill px-3 py-2 fw-bold"
+        >Reality Check</router-link
       >
       <router-link
         to="/flash-cards"
-        class="btn btn-dark btn-sm rounded-pill px-3 py-1"
+        class="btn btn-dark btn-sm rounded-pill px-3 py-2 fw-bold"
         >Make Note Cards</router-link
       >
     </div>
     <div>
-      <h2 class="pb-1 fs-6 fw-bold">Recent</h2>
+      <h2 class="pb-2 fs-6 fw-bold">Recent</h2>
       <div class="card-wrapper d-flex flex-wrap">
         <template v-for="item in userStoreRef.getAllCards.value">
           <rewrite-card

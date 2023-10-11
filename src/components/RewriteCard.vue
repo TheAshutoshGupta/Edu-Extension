@@ -9,7 +9,7 @@
         class="position-absolute rounded-pill bg-dark text-white p-2 card-icon"
         :icon="faPencilAlt"
       />
-      <p>{{ props.cardData.title }}</p>
+      <p class="fw-bold">{{ props.cardData.title }}</p>
       <p>{{ props.cardData.writingStyle.text }}</p>
       <p>{{ props.cardData.lengthOption.text }}</p>
       <p>{{ props.cardData.preexistingKnowledge?.text }}</p>

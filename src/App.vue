@@ -11,22 +11,28 @@ import Logo from "./assets/Logo.png?url";
 </script>
 
 <template>
-  <div class="d-flex px-0 gx-0 h-100">
-    <div class="row bg-dark d-flex flex-column mx-0 p-2" style="flex-shrink: 0">
-      <router-link to="/" class="mb-2 px-0 rounded-circle nav-link"
-        ><font-awesome-icon class="" alt="homepage" :icon="faHouseUser"
+  <div class="d-flex p-0 gx-0 h-100">
+    <div class="row bg-dark d-flex flex-column mx-0 p-3" style="flex-shrink: 0">
+      <router-link to="/" class="mb-4 p-1 rounded-circle nav-link"
+        ><font-awesome-icon class="nav-logo" alt="homepage" :icon="faHouseUser"
       /></router-link>
-      <router-link to="/rewrite" class="mb-2 px-0 rounded-circle nav-link"
-        ><font-awesome-icon class="" alt="rewrite page" :icon="faPencilAlt"
+      <router-link to="/rewrite" class="mb-4 p-1 rounded-circle nav-link"
+        ><font-awesome-icon
+          class="nav-logo"
+          alt="rewrite page"
+          :icon="faPencilAlt"
       /></router-link>
-      <router-link to="/reality-check" class="mb-2 px-0 rounded-circle nav-link"
-        ><font-awesome-icon class="" alt="critical thinking" :icon="faBrain"
+      <router-link to="/reality-check" class="mb-4 p-1 rounded-circle nav-link"
+        ><font-awesome-icon
+          class="nav-logo"
+          alt="critical thinking"
+          :icon="faBrain"
       /></router-link>
-      <router-link to="/flash-cards" class="mb-2 px-0 rounded-circle nav-link"
-        ><font-awesome-icon class="" alt="flash cards" :icon="faBook"
+      <router-link to="/flash-cards" class="mb-4 p-1 rounded-circle nav-link"
+        ><font-awesome-icon class="nav-logo" alt="flash cards" :icon="faBook"
       /></router-link>
-      <router-link to="/user-settings" class="mb-2 px-0 rounded-circle nav-link"
-        ><font-awesome-icon class="" alt="flash cards" :icon="faCog"
+      <router-link to="/user-settings" class="mb-4 p-1 rounded-circle nav-link"
+        ><font-awesome-icon class="nav-logo" alt="flash cards" :icon="faCog"
       /></router-link>
     </div>
     <div
@@ -44,7 +50,7 @@ import Logo from "./assets/Logo.png?url";
 
 <style scoped>
 .logo {
-  max-height: 1.25rem;
+  max-height: 1.5rem;
   width: auto;
 }
 .router-link-active {
@@ -55,8 +61,13 @@ import Logo from "./assets/Logo.png?url";
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 1.5rem;
-  width: 1.5rem;
+  height: 2rem;
+  width: 2rem;
   color: white;
+}
+
+.nav-logo {
+  height: 100%;
+  width: 100%;
 }
 </style>
