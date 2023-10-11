@@ -224,6 +224,9 @@ const makeFetchRequest = () => {
         console.log("OpenAI Response:");
         console.log(response);
         if (response) {
+          // increment group number here, even though it might not be valid JSON
+          // should serve to just ignore invalid json whilst still keeping all valid ones
+          currentGroupNumber++;
 
           // try to parse response as JSON
           try {
@@ -235,31 +238,44 @@ const makeFetchRequest = () => {
 
               if(responseJson["Logical Fallacies"].length > 0) {
                 responseJson["Logical Fallacies"].forEach((fallacy : string) => {
-                  logicalFallacies.push(fallacy);
+                  // check for "None" or "N/A" and ignore
+                  if(fallacy.toLowerCase() !== "none" && fallacy.toLowerCase() !== "n/a" && fallacy.toLowerCase() !== "na" && !fallacy.toLowerCase().startsWith("none"))
+                  {
+                    logicalFallacies.push(fallacy);
+                  }
                 });
               }
 
               if(responseJson["Biased Statements"].length > 0) {
                 responseJson["Biased Statements"].forEach((statement : string) => {
-                  biasedStatements.push(statement);
+                  if(statement.toLowerCase() !== "none" && statement.toLowerCase() !== "n/a" && statement.toLowerCase() !== "na" && !statement.toLowerCase().startsWith("none"))
+                  {
+                    biasedStatements.push(statement);
+                  }
                 });
               }
 
               if(responseJson["Unsupported Arguments"].length > 0) {
                 responseJson["Unsupported Arguments"].forEach((argument : string) => {
-                  unsupportedArguments.push(argument);
+                  if(argument.toLowerCase() !== "none" && argument.toLowerCase() !== "n/a" && argument.toLowerCase() !== "na" && !argument.toLowerCase().startsWith("none"))
+                  {
+                    unsupportedArguments.push(argument);
+                  }
                 });
               }
 
               if(responseJson["Questions for Critical Thinking"].length > 0) {
                 responseJson["Questions for Critical Thinking"].forEach((question : string) => {
-                  questionsForFurtherExploration.push(question);
+                  if(question.toLowerCase() !== "none" && question.toLowerCase() !== "n/a" && question.toLowerCase() !== "na" && !question.toLowerCase().startsWith("none"))
+                  {
+                    questionsForFurtherExploration.push(question);
+                  }
                 });
               }
 
               console.log("Finished parsing group");
 
-              currentGroupNumber++;
+              
               // console.log("Grabbed notecards from group " + currentGroupNumber + " of " + totalGroups + " total groups");
               // check if this was the final group, if so, add to userstore
               if (currentGroupNumber >= totalGroups) {
