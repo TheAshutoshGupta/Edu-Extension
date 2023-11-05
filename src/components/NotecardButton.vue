@@ -200,6 +200,10 @@ const makeFetchRequest = () => {
           console.log("OpenAI Response:");
           console.log(response);
           if (response) {
+            // TODO: implement a better fix (drunken JSON parser?)
+            // for now, this will just ignore any responses we get from OpenAI that are not valid JSON
+            currentGroupNumber++;
+
             // try to parse response as JSON
             try {
               const responseJson = JSON.parse(response);
@@ -221,7 +225,8 @@ const makeFetchRequest = () => {
                     allNotecards.push(flashCard);
                   }
                 });
-                currentGroupNumber++;
+                
+                // currentGroupNumber++;
                 console.log(
                   "Grabbed notecards from group " +
                     currentGroupNumber +
